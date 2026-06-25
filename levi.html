@@ -92,13 +92,8 @@
   #text-input:focus { border-color: var(--blue); }
   .icon-btn { width: 42px; height: 42px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 18px; -webkit-tap-highlight-color: transparent; }
   #btn-camera { background: var(--gray-light); color: #334155; }
-  #btn-voice { background: var(--gray-light); color: #334155; transition: background 0.15s; }
-  #btn-voice.recording { background: #fee2e2 !important; color: var(--red) !important; animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
   #btn-send { background: var(--blue); color: white; }
   #btn-send:disabled { background: #cbd5e1; }
-  #voice-status { font-size: 12px; color: var(--red); text-align: center; margin-top: 6px; display: none; }
-  #voice-status.show { display: block; }
 
   /* DASHBOARD */
   #dashboard-screen { overflow-y: auto; }
@@ -242,12 +237,8 @@
     <div id="input-row">
       <button class="icon-btn" id="btn-camera" onclick="document.getElementById('file-input').click()">📷</button>
       <textarea id="text-input" rows="1" placeholder="Escribí o hablá…" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-      <button class="icon-btn" id="btn-voice"
-        ontouchstart="startVoice(event)" ontouchend="stopVoice(event)" ontouchcancel="stopVoice(event)"
-        onmousedown="startVoice(event)" onmouseup="stopVoice(event)" onmouseleave="stopVoice(event)">🎤</button>
       <button class="icon-btn" id="btn-send" onclick="sendMessage()">➤</button>
     </div>
-    <div id="voice-status">🔴 Grabando... soltá para enviar</div>
   </div>
   <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)">
 </div>
@@ -329,12 +320,10 @@ let supabaseKey = localStorage.getItem('levi_supabase_key') || ''
 let sbClient = null
 let sessionId = localStorage.getItem('levi_session_id') || null
 let messages = []
-let pendingPhotos = []   // [{base64, type, previewUrl}]
+let pendingPhotos = []
 let pendingFicha = null
 let products = []
 let currentFilter = 'todos'
-let recognition = null
-let isRecording = false
 
 // ═══════════════════════════════════════
 // INIT
@@ -490,50 +479,6 @@ async function sendMessage() {
 }
 
 // ═══════════════════════════════════════
-// VOICE
-// ═══════════════════════════════════════
-function startVoice(e) {
-  if (e) e.preventDefault()
-  if (isRecording) return
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  if (!SR) { alert('Tu browser no soporta voz. Usá Safari en iPhone o Chrome en Android.'); return }
-  recognition = new SR()
-  recognition.lang = 'es-AR'
-  recognition.continuous = false
-  recognition.interimResults = true
-  recognition.onstart = () => {
-    isRecording = true
-    document.getElementById('btn-voice').classList.add('recording')
-    document.getElementById('voice-status').classList.add('show')
-  }
-  recognition.onresult = (ev) => {
-    const transcript = Array.from(ev.results).map(r => r[0].transcript).join('')
-    document.getElementById('text-input').value = transcript
-  }
-  recognition.onend = () => {
-    isRecording = false
-    document.getElementById('btn-voice').classList.remove('recording')
-    document.getElementById('voice-status').classList.remove('show')
-    const text = document.getElementById('text-input').value.trim()
-    if (text) sendMessage()
-  }
-  recognition.onerror = (ev) => {
-    isRecording = false
-    document.getElementById('btn-voice').classList.remove('recording')
-    document.getElementById('voice-status').classList.remove('show')
-    if (ev.error !== 'no-speech' && ev.error !== 'aborted') alert('Error de micrófono: ' + ev.error)
-  }
-  try { recognition.start() } catch(err) { console.error(err) }
-}
-
-function stopVoice(e) {
-  if (e) e.preventDefault()
-  if (recognition && isRecording) {
-    try { recognition.stop() } catch(err) { console.error(err) }
-  }
-}
-
-// ═══════════════════════════════════════
 // IMAGES (multi-photo)
 // ═══════════════════════════════════════
 function handleImage(e) {
@@ -610,26 +555,50 @@ function saveSettingsPanel() {
 
 function dismissBanner() { document.getElementById('save-banner').classList.remove('show'); pendingFicha = null }
 
+// Compress image to max size and JPEG quality — keeps photos small enough for DB storage
+function compressImage(dataUrl, maxPx, quality) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      let w = img.width, h = img.height
+      if (w > maxPx || h > maxPx) {
+        if (w > h) { h = Math.round(h * maxPx / w); w = maxPx }
+        else { w = Math.round(w * maxPx / h); h = maxPx }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      resolve(canvas.toDataURL('image/jpeg', quality))
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
+}
+
 async function saveProduct() {
   if (!pendingFicha) return
   document.getElementById('btn-save').textContent = '⏳ Guardando...'
   document.getElementById('btn-save').disabled = true
 
   try {
+    // Upload photos — try Supabase Storage, fallback to compressed base64
     const fotosUrls = []
     for (const url of (pendingFicha._imgUrls || [])) {
-      if (url && url.startsWith('data:')) {
-        try {
-          const mimeType = url.split(':')[1].split(';')[0]
-          const ext = mimeType.split('/')[1]
-          const fileName = `${sessionId}/${Date.now()}-${fotosUrls.length}.${ext}`
-          const blob = await fetch(url).then(r => r.blob())
-          const { data: storageData, error: storageError } = await sbClient.storage.from('product-photos').upload(fileName, blob, { contentType: mimeType })
-          if (!storageError) {
-            const { data: { publicUrl } } = sbClient.storage.from('product-photos').getPublicUrl(fileName)
-            fotosUrls.push(publicUrl)
-          }
-        } catch(e) { console.log('Image upload error:', e) }
+      if (!url || !url.startsWith('data:')) continue
+      const compressed = await compressImage(url, 900, 0.75)
+      try {
+        const mimeType = 'image/jpeg'
+        const fileName = `${sessionId}/${Date.now()}-${fotosUrls.length}.jpg`
+        const blob = await fetch(compressed).then(r => r.blob())
+        const { data: storageData, error: storageError } = await sbClient.storage.from('product-photos').upload(fileName, blob, { contentType: mimeType })
+        if (!storageError) {
+          const { data: { publicUrl } } = sbClient.storage.from('product-photos').getPublicUrl(fileName)
+          fotosUrls.push(publicUrl)
+        } else {
+          fotosUrls.push(compressed)
+        }
+      } catch(e) {
+        fotosUrls.push(compressed)
       }
     }
 
@@ -803,10 +772,15 @@ function productCardHTML(p) {
       </div>
     </div>
     <div class="product-actions">
-      <button class="action-btn green" onclick="setStatus('${p.id}','candidato');event.stopPropagation()">⭐ Candidato</button>
+      ${p.status === 'candidato'
+        ? `<button class="action-btn" style="color:#92400e" onclick="setStatus('${p.id}','completo');event.stopPropagation()">↩ Quitar ⭐</button>`
+        : `<button class="action-btn green" onclick="setStatus('${p.id}','candidato');event.stopPropagation()">⭐ Candidato</button>`}
       <button class="action-btn" onclick="openModal('${p.id}');event.stopPropagation()">Ver más</button>
-      <button class="action-btn blue" onclick="editProduct('${p.id}');event.stopPropagation()">✏️ Editar</button>
-      <button class="action-btn red" onclick="setStatus('${p.id}','descartado');event.stopPropagation()">✕</button>
+      <button class="action-btn blue" onclick="editProduct('${p.id}');event.stopPropagation()">✏️</button>
+      ${p.status === 'descartado'
+        ? `<button class="action-btn" style="color:#16a34a" onclick="setStatus('${p.id}','completo');event.stopPropagation()">↩ Recuperar</button>`
+        : `<button class="action-btn red" onclick="setStatus('${p.id}','descartado');event.stopPropagation()">✕</button>`}
+      <button class="action-btn" style="color:#dc2626;font-size:12px" onclick="deleteProduct('${p.id}');event.stopPropagation()">🗑️</button>
     </div>
   </div>`
 }
@@ -815,6 +789,17 @@ async function setStatus(id, status) {
   await sbClient.from('productos').update({ status }).eq('id', id)
   const p = products.find(x => x.id === id); if (p) p.status = status
   renderDashboard()
+}
+
+async function deleteProduct(id) {
+  const p = products.find(x => x.id === id)
+  const name = p?.nombre || 'este producto'
+  if (!confirm(`¿Borrar "${name}" definitivamente? No se puede deshacer.`)) return
+  const { error } = await sbClient.from('productos').delete().eq('id', id)
+  if (error) { showToast('❌ Error al borrar'); return }
+  products = products.filter(x => x.id !== id)
+  renderDashboard()
+  showToast('🗑️ Producto borrado')
 }
 
 function setFilter(f, btn) {
