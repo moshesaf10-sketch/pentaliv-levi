@@ -398,10 +398,11 @@ async function sendMessage() {
   try {
     const existingProducts = products.slice(-20).map(p => `- ${p.nombre||'?'} | ${p.categoria||''} | FOB:$${p.precio_fob_usd||'?'} | Stand:${p.proveedor_stand||'?'}`)
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
       method: 'POST',
-      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-calls': 'true' },
+      headers: { 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        apiKey,
         model: 'claude-opus-4-5',
         max_tokens: 2048,
         system: getSystemPrompt(existingProducts),
