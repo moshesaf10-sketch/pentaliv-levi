@@ -320,7 +320,8 @@ let supabaseKey = localStorage.getItem('levi_supabase_key') || ''
 let sbClient = null
 let sessionId = localStorage.getItem('levi_session_id') || null
 let messages = []
-let pendingPhotos = []
+let pendingPhotos = []          // [{base64, type, previewUrl}] — fotos del mensaje actual
+let allConversationImgUrls = [] // acumula TODAS las fotos del producto actual
 let pendingFicha = null
 let products = []
 let currentFilter = 'todos'
@@ -432,10 +433,11 @@ async function sendMessage() {
   }
 
   const imgUrls = pendingPhotos.map(p => p.previewUrl)
+  // Acumular fotos de TODOS los mensajes del producto actual
+  allConversationImgUrls.push(...imgUrls)
   messages.push({ role: 'user', content, _imgUrls: imgUrls })
   renderMessage({ role: 'user', content, _imgUrls: imgUrls })
 
-  const savedPhotos = [...pendingPhotos]
   input.value = ''; input.style.height = 'auto'
   clearPhotos()
 
@@ -450,10 +452,11 @@ async function sendMessage() {
       headers: { 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         apiKey,
-        model: 'claude-opus-4-5',
-        max_tokens: 2048,
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1024,
         system: getSystemPrompt(existingProducts),
-        messages: messages.filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({ role: m.role, content: m.content }))
+        // Solo últimos 10 mensajes para mayor velocidad
+        messages: messages.filter(m => m.role === 'user' || m.role === 'assistant').slice(-10).map(m => ({ role: m.role, content: m.content }))
       })
     })
     if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || resp.statusText) }
@@ -468,7 +471,8 @@ async function sendMessage() {
     if (fichaMatch) {
       try {
         pendingFicha = JSON.parse(fichaMatch[1].trim())
-        pendingFicha._imgUrls = imgUrls
+        // Usar TODAS las fotos acumuladas durante la conversación
+        pendingFicha._imgUrls = [...allConversationImgUrls]
         showSaveBanner()
       } catch(e) {}
     }
@@ -553,7 +557,7 @@ function saveSettingsPanel() {
   showToast('✅ Keys actualizadas')
 }
 
-function dismissBanner() { document.getElementById('save-banner').classList.remove('show'); pendingFicha = null }
+function dismissBanner() { document.getElementById('save-banner').classList.remove('show'); pendingFicha = null; allConversationImgUrls = [] }
 
 // Compress image to max size and JPEG quality — keeps photos small enough for DB storage
 function compressImage(dataUrl, maxPx, quality) {
@@ -570,7 +574,7 @@ function compressImage(dataUrl, maxPx, quality) {
       canvas.getContext('2d').drawImage(img, 0, 0, w, h)
       resolve(canvas.toDataURL('image/jpeg', quality))
     }
-    img.onerror = () => resolve(dataUrl)
+    img.onerror = () => resolve(dataUrl) // fallback to original
     img.src = dataUrl
   })
 }
@@ -581,27 +585,20 @@ async function saveProduct() {
   document.getElementById('btn-save').disabled = true
 
   try {
-    // Upload photos — try Supabase Storage, fallback to compressed base64
+    // Guardar fotos como base64 comprimido directamente en DB
+    // 400px max, 0.55 quality → ~8-20KB por foto, confiable 100%
     const fotosUrls = []
     for (const url of (pendingFicha._imgUrls || [])) {
       if (!url || !url.startsWith('data:')) continue
-      const compressed = await compressImage(url, 900, 0.75)
       try {
-        const mimeType = 'image/jpeg'
-        const fileName = `${sessionId}/${Date.now()}-${fotosUrls.length}.jpg`
-        const blob = await fetch(compressed).then(r => r.blob())
-        const { data: storageData, error: storageError } = await sbClient.storage.from('product-photos').upload(fileName, blob, { contentType: mimeType })
-        if (!storageError) {
-          const { data: { publicUrl } } = sbClient.storage.from('product-photos').getPublicUrl(fileName)
-          fotosUrls.push(publicUrl)
-        } else {
-          fotosUrls.push(compressed)
-        }
-      } catch(e) {
+        const compressed = await compressImage(url, 400, 0.55)
         fotosUrls.push(compressed)
+      } catch(e) {
+        fotosUrls.push(url) // fallback al original si falla la compresión
       }
     }
 
+    // Normalizar rol — guardar cualquier valor, solo normalizar formato
     const rolRaw = (pendingFicha.rol || '').toLowerCase().trim()
       .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
       .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u')
@@ -657,8 +654,10 @@ async function saveProduct() {
     const { data, error } = await sbClient.from('productos').insert(productData).select().single()
     if (error) throw new Error(error.message)
 
+    // Save conversation
     await sbClient.from('conversaciones').insert({ producto_id: data.id, session_id: sessionId, messages: messages })
 
+    // Update local cache
     products.push(data)
     dismissBanner()
     addBotMessage(`✅ "${data.nombre || 'Producto'}" guardado. ¿Siguiente?`)
@@ -817,6 +816,7 @@ function openModal(id) {
   const usd = n => n!=null ? '$'+Number(n).toFixed(2) : '— (pendiente)'
   const broker = p.precio_fob_usd ? p.precio_fob_usd * BROKER_PCT : null
 
+  // Photos gallery
   const allPhotos = (p.fotos_urls && p.fotos_urls.filter(Boolean).length > 0)
     ? p.fotos_urls.filter(Boolean)
     : (p.foto_url ? [p.foto_url] : [])
@@ -830,6 +830,7 @@ function openModal(id) {
   html += `<div style="font-size:20px;font-weight:700;color:var(--blue-dark);margin-bottom:4px">${p.nombre||'Sin nombre'}</div>`
   if (p.descripcion) html += `<div style="font-size:13px;color:#64748b;margin-bottom:12px">${p.descripcion}</div>`
 
+  // Opinión del usuario
   html += `<div class="section-title">💬 Mi opinión</div>`
   html += `<div class="opinion-box">
     <div class="opinion-box-label">Tu opinión personal</div>
@@ -842,237 +843,9 @@ function openModal(id) {
     <button onclick="saveOpinion('${id}')" style="margin-top:6px;padding:7px 16px;background:var(--green);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer">Guardar opinión</button>
   </div>`
 
+  // Costos
   html += `<div class="section-title">💰 Costos</div>`
   html += row('FOB China', usd(p.precio_fob_usd))
   html += row('Broker 7%', usd(broker))
   html += row('Seguro 0.3%', usd(p.seguro_usd))
-  html += row('Flete (por CBM)', usd(p.flete_metodo_a_usd))
-  html += row('Arancel Israel', p.arancel_tasa ? `${(p.arancel_tasa*100).toFixed(0)}% = ${usd(p.arancel_usd)}` : '— pendiente')
-  html += `<div class="detail-row total"><span>Costo aterrizado</span><span>${usd(p.costo_aterrizado_usd)}</span></div>`
-  html += row('Precio mayorista mín.', usd(p.precio_mayorista_min_usd))
-  html += row('Precio consumidor', usd(p.precio_consumidor_sugerido_usd))
-
-  if (p.packaging_opciones?.length) {
-    html += `<div class="section-title">📦 Packaging</div>`
-    p.packaging_opciones.forEach(op => {
-      if (typeof op === 'string') html += row(op, '')
-      else html += row(op.tipo||op.nombre||JSON.stringify(op), op.precio_adicional_usd ? `+$${op.precio_adicional_usd} | MOQ ${op.moq}` : '')
-    })
-  }
-
-  if (p.certificados_faltantes?.length || p.certificados_disponibles?.length) {
-    html += `<div class="section-title">⚖️ Legal Israel</div>`
-    ;(p.certificados_disponibles||[]).forEach(c => html += `<div style="color:var(--green);font-size:13px;margin-bottom:2px">✓ ${c}</div>`)
-    ;(p.certificados_faltantes||[]).forEach(c => html += `<div style="color:var(--red);font-size:13px;margin-bottom:2px">✗ ${c} (falta)</div>`)
-  }
-
-  if (p.justificacion) {
-    html += `<div class="section-title">📊 Evaluación LEVI — ${p.calificacion||'?'}/10</div>`
-    html += `<div style="font-size:13px;color:#334155;line-height:1.5">${p.justificacion}</div>`
-    if (p.fortalezas?.length) html += '<div style="margin-top:8px">' + p.fortalezas.map(f => `<div style="font-size:12px;color:var(--green)">✓ ${f}</div>`).join('') + '</div>'
-    if (p.debilidades?.length) html += p.debilidades.map(d => `<div style="font-size:12px;color:var(--red)">✗ ${d}</div>`).join('')
-  }
-
-  if (p.notas_calidad) { html += `<div class="section-title">🔬 Calidad</div><div style="font-size:13px;color:#334155">${p.notas_calidad}</div>` }
-  if (p.comentarios) { html += `<div class="section-title">📝 Comentarios</div><div style="font-size:13px;color:#334155">${p.comentarios}</div>` }
-
-  html += `<div style="height:24px"></div>`
-
-  document.getElementById('modal-content').innerHTML = html
-  document.getElementById('modal').classList.add('show')
-}
-
-async function saveOpinion(id) {
-  const val = document.getElementById(`opinion-input-${id}`).value.trim()
-  const { error } = await sbClient.from('productos').update({ opinion_usuario: val }).eq('id', id)
-  if (error) { showToast('❌ Error guardando'); return }
-  const p = products.find(x => x.id === id); if (p) p.opinion_usuario = val
-  const display = document.getElementById(`opinion-display-${id}`)
-  if (display) display.innerHTML = val
-    ? `<div class="opinion-box-text">${esc(val)}</div>`
-    : `<div class="opinion-placeholder">Sin opinión aún</div>`
-  showToast('✅ Opinión guardada')
-  renderDashboard()
-}
-
-function row(label, value) { return `<div class="detail-row"><span>${label}</span><span>${value}</span></div>` }
-function closeModal() { document.getElementById('modal').classList.remove('show') }
-
-// ═══════════════════════════════════════
-// EDIT PRODUCT
-// ═══════════════════════════════════════
-function editProduct(id) {
-  const p = products.find(x => x.id === id); if (!p) return
-  const v = x => x != null ? String(x) : ''
-  const html = `
-    <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:#f1f5f9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer">✕</button>
-    <div style="font-size:18px;font-weight:700;color:var(--blue-dark);margin-bottom:16px">✏️ Editar producto</div>
-    <form onsubmit="saveEdit(event,'${id}')">
-      <label class="edit-label">Nombre</label>
-      <input class="edit-input" name="nombre" value="${esc2(p.nombre||'')}">
-
-      <label class="edit-label">Categoría</label>
-      <input class="edit-input" name="categoria" value="${esc2(p.categoria||'')}">
-
-      <label class="edit-label">Rol (clasico / stepup / complemento / otro)</label>
-      <input class="edit-input" name="rol" value="${esc2(p.rol||'')}">
-
-      <label class="edit-label">FOB USD</label>
-      <input class="edit-input" type="number" step="0.01" name="precio_fob_usd" value="${v(p.precio_fob_usd)}">
-
-      <label class="edit-label">MOQ base</label>
-      <input class="edit-input" type="number" name="moq_base" value="${v(p.moq_base)}">
-
-      <label class="edit-label">Nota LEVI (1-10)</label>
-      <input class="edit-input" type="number" min="1" max="10" name="calificacion" value="${v(p.calificacion)}">
-
-      <label class="edit-label">Stand proveedor</label>
-      <input class="edit-input" name="proveedor_stand" value="${esc2(p.proveedor_stand||'')}">
-
-      <label class="edit-label">Contacto proveedor</label>
-      <input class="edit-input" name="proveedor_contacto" value="${esc2(p.proveedor_contacto||'')}">
-
-      <label class="edit-label">Lead time (días)</label>
-      <input class="edit-input" type="number" name="lead_time_dias" value="${v(p.lead_time_dias)}">
-
-      <label class="edit-label">Notas de calidad</label>
-      <textarea class="edit-textarea" name="notas_calidad">${p.notas_calidad||''}</textarea>
-
-      <label class="edit-label">Comentarios adicionales</label>
-      <textarea class="edit-textarea" name="comentarios">${p.comentarios||''}</textarea>
-
-      <label class="edit-label">Mi opinión personal</label>
-      <textarea class="edit-textarea" name="opinion_usuario">${p.opinion_usuario||''}</textarea>
-
-      <button type="submit" class="btn-edit-save">💾 Guardar cambios</button>
-      <button type="button" class="btn-edit-cancel" onclick="closeModal()">Cancelar</button>
-    </form>
-  `
-  document.getElementById('modal-content').innerHTML = html
-  document.getElementById('modal').classList.add('show')
-}
-
-async function saveEdit(e, id) {
-  e.preventDefault()
-  const form = e.target
-  const f = form
-  const updates = {
-    nombre: f.nombre.value || null,
-    categoria: f.categoria.value || null,
-    rol: f.rol.value.toLowerCase().trim() || null,
-    precio_fob_usd: parseFloat(f.precio_fob_usd.value) || null,
-    moq_base: parseInt(f.moq_base.value) || null,
-    calificacion: parseInt(f.calificacion.value) || null,
-    proveedor_stand: f.proveedor_stand.value || null,
-    proveedor_contacto: f.proveedor_contacto.value || null,
-    lead_time_dias: parseInt(f.lead_time_dias.value) || null,
-    notas_calidad: f.notas_calidad.value || null,
-    comentarios: f.comentarios.value || null,
-    opinion_usuario: f.opinion_usuario.value || null,
-  }
-  const submitBtn = form.querySelector('button[type=submit]')
-  submitBtn.textContent = '⏳ Guardando...'
-  submitBtn.disabled = true
-  const { error } = await sbClient.from('productos').update(updates).eq('id', id)
-  if (error) { alert('Error: ' + error.message); submitBtn.textContent = '💾 Guardar cambios'; submitBtn.disabled = false; return }
-  const idx = products.findIndex(x => x.id === id)
-  if (idx >= 0) products[idx] = { ...products[idx], ...updates }
-  closeModal()
-  renderDashboard()
-  showToast('✅ Producto actualizado')
-}
-
-function esc2(s) { return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
-
-// ═══════════════════════════════════════
-// NEW PRODUCT
-// ═══════════════════════════════════════
-function newProduct() {
-  showScreen('chat'); messages = []; pendingFicha = null; dismissBanner()
-  document.getElementById('messages').innerHTML = ''
-  addBotMessage('¡Listo! Mandame la foto del siguiente producto.')
-}
-
-// ═══════════════════════════════════════
-// EXPORT EXCEL (CSV)
-// ═══════════════════════════════════════
-function exportExcel() {
-  if (!products.length) { alert('No hay productos para exportar.'); return }
-  const cols = ['nombre','categoria','rol','proveedor_nombre','proveedor_stand','proveedor_contacto','precio_fob_usd','moq_base','cbm_caja_master','unidades_por_caja','material_principal','calificacion','status','costo_aterrizado_usd','precio_mayorista_min_usd','precio_consumidor_sugerido_usd','arancel_tasa','notas_calidad','comentarios','opinion_usuario','justificacion','notas_legales','notas_adicionales','foto_url']
-  const header = cols.join(',')
-  const rows = products.map(p => cols.map(c => {
-    const v = p[c]
-    if (v == null) return ''
-    if (typeof v === 'object') return `"${JSON.stringify(v).replace(/"/g,'""')}"`
-    return `"${String(v).replace(/"/g,'""')}"`
-  }).join(','))
-  const csv = '﻿' + header + '\n' + rows.join('\n')
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a'); a.href = url
-  a.download = 'pentaliv-' + new Date().toISOString().slice(0,10) + '.csv'
-  a.click()
-}
-
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-function setSyncStatus(online) {
-  document.getElementById('sync-dot').classList.toggle('offline', !online)
-}
-function showToast(msg) {
-  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'show'
-  setTimeout(() => t.className = '', 2500)
-}
-function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight,100)+'px' }
-function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }
-
-// ═══════════════════════════════════════
-// SYSTEM PROMPT
-// ═══════════════════════════════════════
-function getSystemPrompt(existingProducts) {
-  const prodContext = existingProducts?.length
-    ? '\n\n## PRODUCTOS YA REGISTRADOS:\n' + existingProducts.join('\n')
-    : ''
-
-  return `Eres LEVI, asistente de sourcing de Pentaliv. Evaluás productos con proveedores chinos en tiempo real.
-
-## DOCTRINA PENTALIV
-- B2B, hogar, marca privada, importa China → Israel, vende al por mayor
-- Categorías: cocina funcional, almacenamiento, limpieza, mantenimiento
-- Excluido: decoración, vajilla decorativa, textiles estéticos
-- Roles: CLASICO (ya se vende bien), STEPUP (valor agregado demostrable, no gadget), COMPLEMENTO (resuelve micro-problema adyacente)
-- Marca privada: impresión directa > in-mold > caja impresa > sticker
-- No el más barato — competir en calidad
-- Este viaje es solo scouting. Pedidos desde Israel.
-- Costos: broker 7% FOB + seguro 0.3%. Flete y arancel pendientes.
-
-## ESTILO
-- Preguntas directas, cortas, numeradas
-- Máximo 5 preguntas por mensaje
-- Sin preámbulos, sin halagos, sin "te soy sincero Moshe"
-- Español rioplatense
-
-## FLUJO
-1. IDENTIFICAR: describí lo que ves. Si hay ambigüedad, preguntá primero.
-2. RECOLECTAR en rondas lógicas:
-   - Ronda 1: precio FOB, MOQ, dimensiones, peso
-   - Ronda 2: opciones de packaging (cualquier tipo que ofrezcan, sin limitarte a formatos fijos), lead time
-   - Ronda 3: criterios de calidad para este material específico (buscá online, pedile a Moshe que verifique)
-   - Ronda 4: normativas Israel para este producto (buscá online, indicá qué certificados pedir)
-3. EVALUAR: rol, fit doctrina, calidad, viabilidad marca privada, nota 1-10
-4. Si Moshe expresa su opinión personal sobre el producto, registrala en el campo 'opinion_usuario'
-5. FICHA cuando Moshe diga "guardar", "listo" o "siguiente":
-
-<FICHA_JSON>
-{"nombre":"","descripcion":"","categoria":"","rol":"","fit_doctrina":"","proveedor_nombre":"","proveedor_stand":"","proveedor_contacto":"","precio_fob_usd":null,"moq_base":null,"packaging_opciones":[],"lead_time_dias":null,"largo_cm":null,"ancho_cm":null,"alto_cm":null,"peso_kg":null,"cbm_unidad":null,"cbm_caja_master":null,"unidades_por_caja":null,"material_principal":"","criterios_evaluados":[],"notas_calidad":"","muestra_disponible":null,"costo_muestra_usd":null,"normativa_israel":[],"certificados_requeridos":[],"certificados_disponibles":[],"certificados_faltantes":[],"notas_legales":"","arancel_tasa":null,"calificacion":null,"justificacion":"","fortalezas":[],"debilidades":[],"duplicados_vinculados":[],"notas_adicionales":"","comentarios":"","opinion_usuario":""}
-</FICHA_JSON>
-
-## REGLAS
-- Si faltan datos, completá con "" o null según el tipo — no bloquees el guardado
-- El rol puede ser cualquier categoría (clasico, stepup, complemento, decoracion, etc.) — siempre ponelo
-- Sé directo si el producto no encaja${prodContext}`
-}
-</script>
-</body>
-</html>
+  html += row('Flete (po
