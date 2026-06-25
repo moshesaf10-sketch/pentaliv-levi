@@ -66,7 +66,7 @@
   #btn-dismiss { background: none; border: none; color: #92400e; font-size: 18px; cursor: pointer; padding: 4px; }
 
   /* INPUT */
-  #input-area { background: white; border-top: 1px solid #e2e8f0; padding: 10px 12px; flex-shrink: 0; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  #input-area { background: white; border-top: 1px solid #e2e8f0; padding: 10px 12px; flex-shrink: 0; padding-bottom: max(22px, env(safe-area-inset-bottom)); }
   #img-preview { display: none; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
   .photo-thumb-wrap { position: relative; display: inline-block; }
   .photo-thumb-wrap img { height: 60px; width: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e8f0; display: block; }
@@ -226,10 +226,12 @@
     <div id="input-row">
       <button class="icon-btn" id="btn-camera" onclick="document.getElementById('file-input').click()">📷</button>
       <textarea id="text-input" rows="1" placeholder="Escribí o hablá…" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-      <button class="icon-btn" id="btn-voice" onclick="toggleVoice()">🎤</button>
+      <button class="icon-btn" id="btn-voice"
+        ontouchstart="startVoice(event)" ontouchend="stopVoice(event)" ontouchcancel="stopVoice(event)"
+        onmousedown="startVoice(event)" onmouseup="stopVoice(event)" onmouseleave="stopVoice(event)">🎤</button>
       <button class="icon-btn" id="btn-send" onclick="sendMessage()">➤</button>
     </div>
-    <div id="voice-status">🔴 Escuchando... tocá 🎤 de nuevo para enviar</div>
+    <div id="voice-status">🔴 Grabando... soltá para enviar</div>
   </div>
   <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)">
 </div>
@@ -472,24 +474,22 @@ async function sendMessage() {
 // ═══════════════════════════════════════
 // VOICE
 // ═══════════════════════════════════════
-function toggleVoice() {
-  if (isRecording) {
-    if (recognition) recognition.stop()
-    return
-  }
+function startVoice(e) {
+  if (e) e.preventDefault()
+  if (isRecording) return
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
   if (!SR) { alert('Tu browser no soporta voz. Usá Safari en iPhone o Chrome en Android.'); return }
   recognition = new SR()
   recognition.lang = 'es-AR'
-  recognition.continuous = true
+  recognition.continuous = false
   recognition.interimResults = true
   recognition.onstart = () => {
     isRecording = true
     document.getElementById('btn-voice').classList.add('recording')
     document.getElementById('voice-status').classList.add('show')
   }
-  recognition.onresult = (e) => {
-    const transcript = Array.from(e.results).map(r => r[0].transcript).join('')
+  recognition.onresult = (ev) => {
+    const transcript = Array.from(ev.results).map(r => r[0].transcript).join('')
     document.getElementById('text-input').value = transcript
   }
   recognition.onend = () => {
@@ -499,13 +499,20 @@ function toggleVoice() {
     const text = document.getElementById('text-input').value.trim()
     if (text) sendMessage()
   }
-  recognition.onerror = (e) => {
+  recognition.onerror = (ev) => {
     isRecording = false
     document.getElementById('btn-voice').classList.remove('recording')
     document.getElementById('voice-status').classList.remove('show')
-    if (e.error !== 'no-speech') alert('Error de micrófono: ' + e.error)
+    if (ev.error !== 'no-speech' && ev.error !== 'aborted') alert('Error de micrófono: ' + ev.error)
   }
-  try { recognition.start() } catch(e) { alert('No se pudo iniciar el micrófono: ' + e.message) }
+  try { recognition.start() } catch(err) { console.error(err) }
+}
+
+function stopVoice(e) {
+  if (e) e.preventDefault()
+  if (recognition && isRecording) {
+    try { recognition.stop() } catch(err) { console.error(err) }
+  }
 }
 
 // ═══════════════════════════════════════
