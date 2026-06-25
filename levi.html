@@ -6,6 +6,22 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="LEVI">
 <title>LEVI — Pentaliv</title>
+<script>
+// Auto-update: cada vez que abre la app, chequea si hay versión nueva
+(async function() {
+  try {
+    const base = location.origin + location.pathname.replace(/\?.*/, '');
+    const r = await fetch(base, { method: 'HEAD', cache: 'no-store' });
+    const tag = r.headers.get('etag') || r.headers.get('last-modified') || '';
+    if (!tag) return;
+    const stored = localStorage.getItem('levi_etag');
+    localStorage.setItem('levi_etag', tag);
+    if (stored && stored !== tag) {
+      location.replace(base + '?r=' + Date.now());
+    }
+  } catch(e) {}
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
