@@ -134,6 +134,18 @@
 
   input[type=file] { display: none; }
 
+  /* SETTINGS PANEL */
+  #settings-panel { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.5); align-items: flex-end; }
+  #settings-panel.show { display: flex; }
+  #settings-inner { background: white; border-radius: 24px 24px 0 0; padding: 24px; width: 100%; }
+  #settings-inner h3 { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: var(--blue-dark); }
+  #settings-inner input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 11px 14px; font-size: 14px; margin-bottom: 4px; outline: none; font-family: inherit; }
+  #settings-inner input:focus { border-color: var(--blue); }
+  .settings-label { font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px; display: block; margin-top: 12px; }
+  .settings-hint { font-size: 11px; color: var(--gray); margin-bottom: 8px; }
+  #btn-settings-save { width: 100%; background: var(--blue); color: white; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+  #btn-settings-close { width: 100%; background: var(--gray-light); color: #334155; border: none; border-radius: 12px; padding: 11px; font-size: 14px; cursor: pointer; margin-top: 8px; }
+
   /* TOAST */
   #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; display: none; z-index: 200; white-space: nowrap; }
   #toast.show { display: block; animation: fadeInOut 2.5s forwards; }
@@ -235,6 +247,21 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- SETTINGS PANEL -->
+<div id="settings-panel">
+  <div id="settings-inner">
+    <h3>⚙️ Configuración de keys</h3>
+    <label class="settings-label">Anthropic API Key</label>
+    <input type="password" id="settings-anthropic" placeholder="sk-ant-api03-..." autocomplete="off">
+    <div class="settings-hint">platform.claude.com → API Keys</div>
+    <label class="settings-label">Supabase Publishable Key</label>
+    <input type="password" id="settings-supabase" placeholder="sb_publishable_... o eyJ..." autocomplete="off">
+    <div class="settings-hint">supabase.com → tu proyecto → Settings → API Keys</div>
+    <button id="btn-settings-save" onclick="saveSettingsPanel()">Guardar</button>
+    <button id="btn-settings-close" onclick="closeSettings()">Cancelar</button>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════
@@ -467,27 +494,27 @@ function showSaveBanner() {
 }
 
 function openSettings() {
-  const ak = prompt('Anthropic API Key (sk-ant-...):', '')
-  if (ak === null) return
-  if (ak && ak.startsWith('sk-')) {
-    apiKey = ak
-    localStorage.setItem('levi_anthropic_key', ak)
-    showToast('✅ Anthropic key actualizada')
-  } else if (ak) {
-    alert('Key inválida — debe empezar con sk-ant-')
-    return
+  document.getElementById('settings-anthropic').value = ''
+  document.getElementById('settings-supabase').value = ''
+  document.getElementById('settings-panel').classList.add('show')
+}
+function closeSettings() {
+  document.getElementById('settings-panel').classList.remove('show')
+}
+function saveSettingsPanel() {
+  const ak = document.getElementById('settings-anthropic').value.trim()
+  const sk = document.getElementById('settings-supabase').value.trim()
+  if (ak) {
+    if (!ak.startsWith('sk-')) { alert('Anthropic key inválida — debe empezar con sk-ant-'); return }
+    apiKey = ak; localStorage.setItem('levi_anthropic_key', ak)
   }
-  const sk = prompt('Supabase Key (sb_publishable_ o eyJ...):', '')
-  if (sk === null) return
-  if (sk && (sk.startsWith('sb_') || sk.startsWith('eyJ'))) {
-    supabaseKey = sk
-    localStorage.setItem('levi_supabase_key', sk)
-    initSupabase()
-    ensureSession()
-    showToast('✅ Supabase key actualizada')
-  } else if (sk) {
-    alert('Key inválida')
+  if (sk) {
+    if (!sk.startsWith('sb_') && !sk.startsWith('eyJ')) { alert('Supabase key inválida'); return }
+    supabaseKey = sk; localStorage.setItem('levi_supabase_key', sk)
+    initSupabase(); ensureSession()
   }
+  closeSettings()
+  showToast('✅ Keys actualizadas')
 }
 
 function dismissBanner() { document.getElementById('save-banner').classList.remove('show'); pendingFicha = null }
