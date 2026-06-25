@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LEVI">
+<title>LEVI — Pentaliv</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #0369a1; --blue-dark: #0c4a6e;
+    --green: #16a34a; --red: #dc2626; --amber: #d97706;
+    --gray: #6b7280; --gray-light: #f3f4f6;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* HEADER */
+  #header { background: var(--blue-dark); color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding-top: max(12px, env(safe-area-inset-top)); }
+  #header h1 { font-size: 20px; font-weight: 700; }
+  #header small { font-size: 11px; opacity: 0.7; display: block; }
+  .hbtn { background: rgba(255,255,255,0.15); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+  #sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; margin-left: 6px; }
+  #sync-dot.offline { background: #f59e0b; }
+
+  /* SCREENS */
+  .screen { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .screen.active { display: flex; }
+
+  /* SETUP */
+  #setup-screen { justify-content: center; padding: 24px; overflow-y: auto; }
+  #setup-screen h2 { font-size: 22px; font-weight: 700; color: var(--blue-dark); margin-bottom: 6px; }
+  #setup-screen p { color: var(--gray); font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+  .setup-label { font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px; display: block; }
+  .setup-hint { font-size: 11px; color: var(--gray); margin-bottom: 10px; }
+  .setup-hint a { color: var(--blue); }
+  #setup-screen input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-bottom: 4px; outline: none; }
+  #setup-screen input:focus { border-color: var(--blue); }
+  .btn-primary { width: 100%; background: var(--blue); color: white; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+
+  /* CHAT */
+  #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 85%; padding: 12px 14px; border-radius: 18px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+  .msg.user .bubble { background: var(--blue); color: white; border-bottom-right-radius: 4px; }
+  .msg.assistant .bubble { background: white; color: #1e293b; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .bubble img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 6px; display: block; }
+  .msg-time { font-size: 10px; opacity: 0.5; margin-top: 4px; text-align: right; }
+  #typing { display: none; }
+  #typing.show { display: flex; }
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 18px; border-bottom-left-radius: 4px; }
+  .dot { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* SAVE BANNER */
+  #save-banner { display: none; background: #fefce8; border-top: 1px solid #fde68a; padding: 12px 16px; flex-shrink: 0; }
+  #save-banner.show { display: flex; align-items: center; gap: 10px; }
+  #save-banner-text { flex: 1; font-size: 13px; color: #92400e; }
+  #save-banner-text strong { display: block; font-size: 14px; }
+  #btn-save { background: var(--amber); color: white; border: none; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  #btn-dismiss { background: none; border: none; color: #92400e; font-size: 18px; cursor: pointer; padding: 4px; }
+
+  /* INPUT */
+  #input-area { background: white; border-top: 1px solid #e2e8f0; padding: 10px 12px; flex-shrink: 0; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  #img-preview { position: relative; display: inline-block; margin-bottom: 8px; }
+  #img-preview img { height: 60px; width: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e8f0; }
+  #img-preview button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: #334155; color: white; border: none; border-radius: 50%; font-size: 12px; cursor: pointer; }
+  #input-row { display: flex; gap: 8px; align-items: flex-end; }
+  #text-input { flex: 1; border: 1.5px solid #e2e8f0; border-radius: 22px; padding: 10px 14px; font-size: 15px; resize: none; max-height: 100px; overflow-y: auto; outline: none; font-family: inherit; line-height: 1.4; }
+  #text-input:focus { border-color: var(--blue); }
+  .icon-btn { width: 42px; height: 42px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 18px; -webkit-tap-highlight-color: transparent; }
+  #btn-camera { background: var(--gray-light); color: #334155; }
+  #btn-voice { background: var(--gray-light); color: #334155; transition: background 0.15s; }
+  #btn-voice.recording { background: #fee2e2; color: var(--red); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+  #btn-send { background: var(--blue); color: white; }
+  #btn-send:disabled { background: #cbd5e1; }
+  #voice-status { font-size: 12px; color: var(--red); text-align: center; margin-top: 6px; display: none; }
+  #voice-status.show { display: block; }
+
+  /* DASHBOARD */
+  #dashboard-screen { overflow-y: auto; }
+  #dash-header { background: var(--blue-dark); color: white; padding: 16px; flex-shrink: 0; }
+  #dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+  .stat-card { background: rgba(255,255,255,0.12); border-radius: 12px; padding: 12px 10px; text-align: center; }
+  .stat-num { font-size: 24px; font-weight: 700; }
+  .stat-label { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+  #cbm-bar-wrap { margin-top: 12px; }
+  #cbm-bar-track { height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; }
+  #cbm-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  #cbm-label { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+  #dash-filters { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; background: white; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+  .filter-btn { white-space: nowrap; padding: 6px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 13px; cursor: pointer; color: var(--gray); }
+  .filter-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+  #products-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .product-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .product-card-body { display: flex; gap: 12px; padding: 14px; }
+  .product-thumb { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .product-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+  .product-info { flex: 1; min-width: 0; }
+  .product-name { font-weight: 600; font-size: 15px; color: #1e293b; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .product-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tag-clasico { background: #dbeafe; color: #1d4ed8; }
+  .tag-stepup { background: #ede9fe; color: #7c3aed; }
+  .tag-complemento { background: #dcfce7; color: #16a34a; }
+  .tag-candidato { background: #fef9c3; color: #854d0e; }
+  .tag-descartado { background: #fee2e2; color: var(--red); }
+  .tag-completo { background: var(--gray-light); color: var(--gray); }
+  .product-nums { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; }
+  .num-cell { font-size: 11px; color: var(--gray); }
+  .num-cell strong { display: block; font-size: 13px; color: #1e293b; }
+  .product-actions { display: flex; border-top: 1px solid #f1f5f9; }
+  .action-btn { flex: 1; padding: 10px; text-align: center; font-size: 13px; cursor: pointer; border: none; background: none; color: var(--gray); }
+  .action-btn.green { color: var(--green); }
+  .action-btn.red { color: var(--red); }
+
+  /* MODAL */
+  #modal { display: none; position: fixed; inset: 0; z-index: 100; }
+  #modal.show { display: flex; flex-direction: column; }
+  #modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+  #modal-content { position: relative; background: white; border-radius: 24px 24px 0 0; max-height: 90dvh; overflow-y: auto; margin-top: auto; padding: 20px; }
+  .section-title { font-weight: 600; font-size: 14px; color: #334155; margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
+  .detail-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+  .detail-row span:first-child { color: var(--gray); }
+  .detail-row span:last-child { font-weight: 500; }
+  .detail-row.total span { font-weight: 700; font-size: 15px; color: var(--blue-dark); }
+
+  /* FAB */
+  #btn-new { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); right: 20px; z-index: 50; width: 56px; height: 56px; background: var(--blue); color: white; border: none; border-radius: 50%; font-size: 28px; box-shadow: 0 4px 12px rgba(3,105,161,0.4); cursor: pointer; display: none; align-items: center; justify-content: center; }
+
+  input[type=file] { display: none; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; display: none; z-index: 200; white-space: nowrap; }
+  #toast.show { display: block; animation: fadeInOut 2.5s forwards; }
+  @keyframes fadeInOut { 0%{opacity:0} 15%{opacity:1} 75%{opacity:1} 100%{opacity:0} }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>LEVI <span id="sync-dot"></span></h1>
+    <small>Pentaliv Sourcing</small>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="hbtn" onclick="showScreen('chat')">💬 Chat</button>
+    <button class="hbtn" onclick="showScreen('dashboard');loadAndRenderDashboard()">📋 Productos</button>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div id="setup-screen" class="screen active">
+  <h2>Configurar LEVI</h2>
+  <p>Solo la primera vez. Tus datos quedan guardados en este dispositivo.</p>
+
+  <label class="setup-label">API Key de Anthropic (la IA)</label>
+  <input type="password" id="inp-anthropic" placeholder="sk-ant-api03-..." autocomplete="off">
+  <div class="setup-hint">→ <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
+
+  <label class="setup-label">Supabase Anon Key (la base de datos)</label>
+  <input type="password" id="inp-supabase-key" placeholder="eyJhbGci..." autocomplete="off">
+  <div class="setup-hint">→ supabase.com → tu proyecto → Settings → API Keys → <strong>Publishable key</strong> → copiar</div>
+
+  <button class="btn-primary" onclick="saveSetup()">Guardar y empezar →</button>
+</div>
+
+<!-- CHAT -->
+<div id="chat-screen" class="screen">
+  <div id="messages"></div>
+  <div id="typing" class="msg assistant">
+    <div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+  <div id="save-banner">
+    <div id="save-banner-text">
+      <strong id="save-product-name">Producto listo</strong>
+      <span id="save-product-info"></span>
+    </div>
+    <button id="btn-save" onclick="saveProduct()">💾 Guardar</button>
+    <button id="btn-dismiss" onclick="dismissBanner()">✕</button>
+  </div>
+  <div id="input-area">
+    <div id="img-preview" style="display:none">
+      <img id="preview-img" src=""><button onclick="clearImage()">✕</button>
+    </div>
+    <div id="input-row">
+      <button class="icon-btn" id="btn-camera" onclick="document.getElementById('file-input').click()">📷</button>
+      <textarea id="text-input" rows="1" placeholder="Escribí o hablá…" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <button class="icon-btn" id="btn-voice" ontouchstart="startVoice(event)" ontouchend="stopVoice(event)" onmousedown="startVoice(event)" onmouseup="stopVoice(event)">🎤</button>
+      <button class="icon-btn" id="btn-send" onclick="sendMessage()">➤</button>
+    </div>
+    <div id="voice-status">🔴 Hablando... soltá para enviar</div>
+  </div>
+  <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)">
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard-screen" class="screen">
+  <div id="dash-header">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:700;font-size:18px">Productos <span id="dash-count" style="font-size:13px;font-weight:400;opacity:0.7"></span></div>
+      <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer">📥 Excel</button>
+    </div>
+    <div id="dash-stats">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Evaluados</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-candidatos">0</div><div class="stat-label">Candidatos</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-cbm">0</div><div class="stat-label">CBM usado</div></div>
+    </div>
+    <div id="cbm-bar-wrap">
+      <div id="cbm-bar-track"><div id="cbm-bar-fill"></div></div>
+      <div id="cbm-label"></div>
+    </div>
+  </div>
+  <div id="dash-filters">
+    <button class="filter-btn active" onclick="setFilter('todos',this)">Todos</button>
+    <button class="filter-btn" onclick="setFilter('candidato',this)">⭐ Candidatos</button>
+    <button class="filter-btn" onclick="setFilter('clasico',this)">Clásicos</button>
+    <button class="filter-btn" onclick="setFilter('stepup',this)">Step-up</button>
+    <button class="filter-btn" onclick="setFilter('complemento',this)">Complementos</button>
+    <button class="filter-btn" onclick="setFilter('descartado',this)">Descartados</button>
+  </div>
+  <div id="products-list"></div>
+</div>
+
+<button id="btn-new" onclick="newProduct()">＋</button>
+
+<div id="modal">
+  <div id="modal-backdrop" onclick="closeModal()"></div>
+  <div id="modal-content"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://vnxyxpbeinigxkueusfa.supabase.co'
+const BROKER_PCT = 0.07
+const SEGURO_PCT = 0.003
+const CBM_CONTAINER = 67
+const SESSION_NAME = 'China Junio 2026'
+
+const COST_CONFIG = {
+  flete_por_cbm: null,
+  honorarios: null,
+  markup_mayorista: null,
+  markup_consumidor: null,
+}
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let apiKey = localStorage.getItem('levi_anthropic_key') || ''
+let supabaseKey = localStorage.getItem('levi_supabase_key') || ''
+let sbClient = null
+let sessionId = localStorage.getItem('levi_session_id') || null
+let messages = []
+let uploadedImageBase64 = null
+let uploadedImageType = null
+let pendingFicha = null
+let products = []
+let currentFilter = 'todos'
+let recognition = null
+let isRecording = false
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.onload = async () => {
+  if (apiKey && supabaseKey) {
+    initSupabase()
+    await ensureSession()
+    showScreen('chat')
+    addBotMessage('¡Hola! Soy LEVI, tu asesor de sourcing. Mandame la foto de un producto y arrancamos.')
+  }
+}
+
+function initSupabase() {
+  sbClient = supabase.createClient(SUPABASE_URL, supabaseKey)
+  document.getElementById('sync-dot').classList.remove('offline')
+}
+
+async function ensureSession() {
+  if (sessionId) return
+  try {
+    const { data, error } = await sbClient.from('sessions').select('id').eq('nombre', SESSION_NAME).single()
+    if (data) { sessionId = data.id; localStorage.setItem('levi_session_id', sessionId); return }
+    const { data: newSession } = await sbClient.from('sessions').insert({ nombre: SESSION_NAME, cbm_total_container: CBM_CONTAINER }).select('id').single()
+    if (newSession) { sessionId = newSession.id; localStorage.setItem('levi_session_id', sessionId) }
+  } catch(e) { console.log('session error:', e) }
+}
+
+// ═══════════════════════════════════════
+// SETUP
+// ═══════════════════════════════════════
+function saveSetup() {
+  const ak = document.getElementById('inp-anthropic').value.trim()
+  const sk = document.getElementById('inp-supabase-key').value.trim()
+  if (!ak.startsWith('sk-')) { alert('La Anthropic key debe empezar con sk-ant-...'); return }
+  if (!sk.startsWith('eyJ') && !sk.startsWith('sb_')) { alert('La Supabase key no parece válida'); return }
+  apiKey = ak; supabaseKey = sk
+  localStorage.setItem('levi_anthropic_key', ak)
+  localStorage.setItem('levi_supabase_key', sk)
+  initSupabase()
+  ensureSession().then(() => {
+    showScreen('chat')
+    addBotMessage('¡Todo listo! Soy LEVI. Mandame la foto de un producto y arrancamos la evaluación.')
+  })
+}
+
+// ═══════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
+  document.getElementById(name + '-screen').classList.add('active')
+  document.getElementById('btn-new').style.display = name === 'dashboard' ? 'flex' : 'none'
+}
+
+// ═══════════════════════════════════════
+// MESSAGES
+// ═══════════════════════════════════════
+function addBotMessage(text) {
+  messages.push({ role: 'assistant', content: text })
+  renderMessage({ role: 'assistant', content: text })
+}
+
+function renderMessage(msg) {
+  const el = document.getElementById('messages')
+  const div = document.createElement('div')
+  div.className = 'msg ' + msg.role
+  const text = typeof msg.content === 'string' ? msg.content : (msg.content.find?.(b => b.type === 'text')?.text || '')
+  const imgUrl = msg._imgUrl || null
+  const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  div.innerHTML = `<div class="bubble">${imgUrl ? `<img src="${imgUrl}">` : ''}${esc(text)}<div class="msg-time">${time}</div></div>`
+  el.appendChild(div)
+  el.scrollTop = el.scrollHeight
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
+}
+
+// ═══════════════════════════════════════
+// SEND
+// ═══════════════════════════════════════
+async function sendMessage() {
+  const input = document.getElementById('text-input')
+  const text = input.value.trim()
+  if (!text && !uploadedImageBase64) return
+
+  let content = uploadedImageBase64
+    ? [{ type: 'image', source: { type: 'base64', media_type: uploadedImageType, data: uploadedImageBase64 } }, { type: 'text', text: text || 'Evaluá este producto.' }]
+    : text
+
+  const imgUrl = uploadedImageBase64 ? `data:${uploadedImageType};base64,${uploadedImageBase64}` : null
+  messages.push({ role: 'user', content, _imgUrl: imgUrl })
+  renderMessage({ role: 'user', content, _imgUrl: imgUrl })
+
+  input.value = ''; input.style.height = 'auto'
+  clearImage()
+  document.getElementById('typing').classList.add('show')
+  document.getElementById('messages').scrollTop = 9999
+
+  try {
+    const existingProducts = products.slice(-20).map(p => `- ${p.nombre||'?'} | ${p.categoria||''} | FOB:$${p.precio_fob_usd||'?'} | Stand:${p.proveedor_stand||'?'}`)
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-calls': 'true' },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 2048,
+        system: getSystemPrompt(existingProducts),
+        messages: messages.filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({ role: m.role, content: m.content }))
+      })
+    })
+    if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || resp.statusText) }
+    const data = await resp.json()
+    const assistantText = data.content.find(b => b.type === 'text')?.text || ''
+
+    document.getElementById('typing').classList.remove('show')
+    messages.push({ role: 'assistant', content: assistantText })
+    renderMessage({ role: 'assistant', content: assistantText })
+
+    const fichaMatch = assistantText.match(/<FICHA_JSON>([\s\S]*?)<\/FICHA_JSON>/)
+    if (fichaMatch) {
+      try { pendingFicha = JSON.parse(fichaMatch[1].trim()); pendingFicha._imgUrl = imgUrl; showSaveBanner() } catch(e) {}
+    }
+  } catch(e) {
+    document.getElementById('typing').classList.remove('show')
+    addBotMessage('❌ Error: ' + e.message)
+  }
+}
+
+// ═══════════════════════════════════════
+// VOICE
+// ═══════════════════════════════════════
+function startVoice(e) {
+  e.preventDefault()
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  if (!SR) { alert('Usá Chrome en Android o Safari en iPhone para voz.'); return }
+  recognition = new SR()
+  recognition.lang = 'es-AR'
+  recognition.continuous = false
+  recognition.interimResults = true
+  recognition.onresult = (e) => { document.getElementById('text-input').value = Array.from(e.results).map(r => r[0].transcript).join('') }
+  recognition.onend = () => {
+    isRecording = false
+    document.getElementById('btn-voice').classList.remove('recording')
+    document.getElementById('voice-status').classList.remove('show')
+    if (document.getElementById('text-input').value.trim()) sendMessage()
+  }
+  recognition.onerror = () => {
+    isRecording = false
+    document.getElementById('btn-voice').classList.remove('recording')
+    document.getElementById('voice-status').classList.remove('show')
+  }
+  recognition.start()
+  isRecording = true
+  document.getElementById('btn-voice').classList.add('recording')
+  document.getElementById('voice-status').classList.add('show')
+}
+
+function stopVoice(e) { e.preventDefault(); if (recognition && isRecording) recognition.stop() }
+
+// ═══════════════════════════════════════
+// IMAGE
+// ═══════════════════════════════════════
+function handleImage(e) {
+  const file = e.target.files[0]; if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    const full = ev.target.result
+    uploadedImageBase64 = full.substring(full.indexOf(',') + 1)
+    uploadedImageType = file.type
+    document.getElementById('preview-img').src = full
+    document.getElementById('img-preview').style.display = 'inline-block'
+  }
+  reader.readAsDataURL(file)
+  e.target.value = ''
+}
+
+function clearImage() {
+  uploadedImageBase64 = null; uploadedImageType = null
+  document.getElementById('img-preview').style.display = 'none'
+  document.getElementById('preview-img').src = ''
+}
+
+// ═══════════════════════════════════════
+// SAVE PRODUCT → SUPABASE
+// ═══════════════════════════════════════
+function showSaveBanner() {
+  if (!pendingFicha) return
+  document.getElementById('save-product-name').textContent = pendingFicha.nombre || 'Producto evaluado'
+  const info = []
+  if (pendingFicha.calificacion) info.push(`Nota: ${pendingFicha.calificacion}/10`)
+  if (pendingFicha.precio_fob_usd) info.push(`FOB: $${pendingFicha.precio_fob_usd}`)
+  document.getElementById('save-product-info').textContent = info.join(' · ')
+  document.getElementById('save-banner').classList.add('show')
+}
+
+function dismissBanner() { document.getElementById('save-banner').classList.remove('show'); pendingFicha = null }
+
+async function saveProduct() {
+  if (!pendingFicha) return
+  document.getElementById('btn-save').textContent = '⏳ Guardando...'
+  document.getElementById('btn-save').disabled = true
+
+  try {
+    // Upload image to Supabase Storage if exists
+    let fotoUrl = null
+    if (pendingFicha._imgUrl && pendingFicha._imgUrl.startsWith('data:')) {
+      try {
+        const base64 = pendingFicha._imgUrl.split(',')[1]
+        const mimeType = pendingFicha._imgUrl.split(':')[1].split(';')[0]
+        const ext = mimeType.split('/')[1]
+        const fileName = `${sessionId}/${Date.now()}.${ext}`
+        const blob = await fetch(pendingFicha._imgUrl).then(r => r.blob())
+        const { data: storageData, error: storageError } = await sbClient.storage.from('product-photos').upload(fileName, blob, { contentType: mimeType })
+        if (!storageError) {
+          const { data: { publicUrl } } = sbClient.storage.from('product-photos').getPublicUrl(fileName)
+          fotoUrl = publicUrl
+        }
+      } catch(e) { console.log('Image upload error:', e) }
+    }
+
+    const costos = calcularCostos(pendingFicha)
+    const productData = {
+      session_id: sessionId,
+      nombre: pendingFicha.nombre,
+      descripcion: pendingFicha.descripcion,
+      categoria: pendingFicha.categoria,
+      rol: pendingFicha.rol,
+      fit_doctrina: pendingFicha.fit_doctrina,
+      proveedor_nombre: pendingFicha.proveedor_nombre,
+      proveedor_stand: pendingFicha.proveedor_stand,
+      proveedor_contacto: pendingFicha.proveedor_contacto,
+      precio_fob_usd: pendingFicha.precio_fob_usd,
+      moq_base: pendingFicha.moq_base,
+      packaging_opciones: pendingFicha.packaging_opciones || [],
+      lead_time_dias: pendingFicha.lead_time_dias,
+      largo_cm: pendingFicha.largo_cm,
+      ancho_cm: pendingFicha.ancho_cm,
+      alto_cm: pendingFicha.alto_cm,
+      peso_kg: pendingFicha.peso_kg,
+      cbm_unidad: pendingFicha.cbm_unidad,
+      cbm_caja_master: pendingFicha.cbm_caja_master,
+      unidades_por_caja: pendingFicha.unidades_por_caja,
+      material_principal: pendingFicha.material_principal,
+      criterios_evaluados: pendingFicha.criterios_evaluados || [],
+      notas_calidad: pendingFicha.notas_calidad,
+      muestra_disponible: pendingFicha.muestra_disponible,
+      costo_muestra_usd: pendingFicha.costo_muestra_usd,
+      normativa_israel: pendingFicha.normativa_israel || [],
+      certificados_requeridos: pendingFicha.certificados_requeridos || [],
+      certificados_disponibles: pendingFicha.certificados_disponibles || [],
+      certificados_faltantes: pendingFicha.certificados_faltantes || [],
+      notas_legales: pendingFicha.notas_legales,
+      arancel_tasa: pendingFicha.arancel_tasa,
+      calificacion: pendingFicha.calificacion,
+      justificacion: pendingFicha.justificacion,
+      fortalezas: pendingFicha.fortalezas || [],
+      debilidades: pendingFicha.debilidades || [],
+      duplicados_vinculados: pendingFicha.duplicados_vinculados || [],
+      notas_adicionales: pendingFicha.notas_adicionales,
+      foto_url: fotoUrl,
+      status: 'completo',
+      ...costos
+    }
+
+    const { data, error } = await sbClient.from('productos').insert(productData).select().single()
+    if (error) throw new Error(error.message)
+
+    // Save conversation
+    await sbClient.from('conversaciones').insert({ producto_id: data.id, session_id: sessionId, messages: messages })
+
+    // Update local cache
+    products.push({ ...data, _imgUrl: pendingFicha._imgUrl })
+    dismissBanner()
+    addBotMessage(`✅ "${data.nombre || 'Producto'}" guardado en la nube. ¿Empezamos con el siguiente?`)
+    showToast('✅ Guardado en la nube')
+  } catch(e) {
+    addBotMessage('❌ Error guardando: ' + e.message)
+  } finally {
+    document.getElementById('btn-save').textContent = '💾 Guardar'
+    document.getElementById('btn-save').disabled = false
+  }
+}
+
+function calcularCostos(f) {
+  const fob = f.precio_fob_usd; if (!fob) return {}
+  const broker = fob * BROKER_PCT
+  const seguro = fob * SEGURO_PCT
+  const flete_a = COST_CONFIG.flete_por_cbm && f.cbm_unidad ? COST_CONFIG.flete_por_cbm * f.cbm_unidad : null
+  const base_arancel = fob + broker + seguro + (flete_a || 0)
+  const arancel = f.arancel_tasa != null ? base_arancel * f.arancel_tasa : null
+  const costo = flete_a != null && arancel != null
+    ? fob + broker + seguro + flete_a + arancel + (COST_CONFIG.honorarios || 0) : null
+  return {
+    seguro_usd: seguro,
+    flete_metodo_a_usd: flete_a,
+    arancel_tasa: f.arancel_tasa,
+    arancel_usd: arancel,
+    honorarios_usd: COST_CONFIG.honorarios,
+    costo_aterrizado_usd: costo,
+    precio_mayorista_min_usd: costo && COST_CONFIG.markup_mayorista ? costo * COST_CONFIG.markup_mayorista : null,
+    precio_consumidor_sugerido_usd: (costo && COST_CONFIG.markup_mayorista && COST_CONFIG.markup_consumidor) ? costo * COST_CONFIG.markup_mayorista * COST_CONFIG.markup_consumidor : null
+  }
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+async function loadAndRenderDashboard() {
+  document.getElementById('products-list').innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8">Cargando...</div>'
+  try {
+    const { data, error } = await sbClient.from('productos').select('*').order('created_at', { ascending: false })
+    if (error) throw new Error(error.message)
+    products = data || []
+    renderDashboard()
+    setSyncStatus(true)
+  } catch(e) {
+    document.getElementById('products-list').innerHTML = `<div style="text-align:center;padding:30px;color:var(--red)">Error: ${e.message}</div>`
+    setSyncStatus(false)
+  }
+}
+
+function renderDashboard() {
+  const valid = products.filter(p => p.status !== 'descartado')
+  const cbmTotal = valid.reduce((s,p) => s + (p.cbm_caja_master||0), 0)
+  const pct = Math.round((cbmTotal / CBM_CONTAINER) * 100)
+
+  document.getElementById('stat-total').textContent = products.length
+  document.getElementById('stat-candidatos').textContent = products.filter(p => p.status === 'candidato').length
+  document.getElementById('stat-cbm').textContent = cbmTotal.toFixed(1)
+  document.getElementById('dash-count').textContent = `(${products.length})`
+
+  const fill = document.getElementById('cbm-bar-fill')
+  fill.style.width = Math.min(pct,100) + '%'
+  fill.style.background = pct > 90 ? '#ef4444' : pct > 70 ? '#f59e0b' : '#22c55e'
+  document.getElementById('cbm-label').textContent = `${cbmTotal.toFixed(1)} / ${CBM_CONTAINER} CBM — ${(CBM_CONTAINER-cbmTotal).toFixed(1)} disponibles`
+
+  const filtered = products.filter(p => {
+    if (currentFilter === 'todos') return true
+    if (currentFilter === 'candidato') return p.status === 'candidato'
+    if (currentFilter === 'descartado') return p.status === 'descartado'
+    return p.rol === currentFilter
+  })
+
+  const list = document.getElementById('products-list')
+  if (!filtered.length) { list.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8">No hay productos aquí</div>'; return }
+  list.innerHTML = filtered.map(p => productCardHTML(p)).join('')
+}
+
+function productCardHTML(p) {
+  const thumb = p.foto_url
+    ? `<div class="product-thumb"><img src="${p.foto_url}" alt=""></div>`
+    : `<div class="product-thumb">📦</div>`
+  const rolLabel = {clasico:'Clásico',stepup:'Step-up',complemento:'Complemento'}
+  const rolTag = p.rol ? `<span class="tag tag-${p.rol}">${rolLabel[p.rol]||p.rol}</span>` : ''
+  const statusTag = `<span class="tag tag-${p.status}">${p.status}</span>`
+  const usd = n => n!=null ? '$'+Number(n).toFixed(2) : '—'
+  const broker = p.precio_fob_usd ? p.precio_fob_usd * BROKER_PCT : null
+  const costoAprox = p.costo_aterrizado_usd || (p.precio_fob_usd && broker ? '~$'+(p.precio_fob_usd + broker).toFixed(2) : '—')
+  return `<div class="product-card">
+    <div class="product-card-body">
+      ${thumb}
+      <div class="product-info">
+        <div style="display:flex;align-items:start;justify-content:space-between">
+          <div class="product-name">${p.nombre||'Sin nombre'}</div>
+          ${p.calificacion ? `<div style="color:var(--amber);font-size:13px;font-weight:700;white-space:nowrap">⭐${p.calificacion}</div>` : ''}
+        </div>
+        <div class="product-tags">${rolTag}${statusTag}</div>
+        <div class="product-nums">
+          <div class="num-cell"><strong>${usd(p.precio_fob_usd)}</strong>FOB</div>
+          <div class="num-cell"><strong>${typeof costoAprox === 'string' ? costoAprox : usd(costoAprox)}</strong>Israel</div>
+          <div class="num-cell"><strong>${p.moq_base||'—'}</strong>MOQ</div>
+        </div>
+        ${p.proveedor_stand ? `<div style="font-size:11px;color:#94a3b8;margin-top:4px">Stand: ${p.proveedor_stand}</div>` : ''}
+      </div>
+    </div>
+    <div class="product-actions">
+      <button class="action-btn green" onclick="setStatus('${p.id}','candidato');event.stopPropagation()">⭐ Candidato</button>
+      <button class="action-btn" onclick="openModal('${p.id}');event.stopPropagation()">Ver más</button>
+      <button class="action-btn red" onclick="setStatus('${p.id}','descartado');event.stopPropagation()">✕ Descartar</button>
+    </div>
+  </div>`
+}
+
+async function setStatus(id, status) {
+  await sbClient.from('productos').update({ status }).eq('id', id)
+  const p = products.find(x => x.id === id); if (p) p.status = status
+  renderDashboard()
+}
+
+function setFilter(f, btn) {
+  currentFilter = f
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderDashboard()
+}
+
+// ═══════════════════════════════════════
+// MODAL DETALLE
+// ═══════════════════════════════════════
+function openModal(id) {
+  const p = products.find(x => x.id === id); if (!p) return
+  const usd = n => n!=null ? '$'+Number(n).toFixed(2) : '— (pendiente)'
+  const broker = p.precio_fob_usd ? p.precio_fob_usd * BROKER_PCT : null
+  let html = ''
+  if (p.foto_url) html += `<img src="${p.foto_url}" style="width:100%;height:180px;object-fit:cover;border-radius:14px;margin-bottom:16px">`
+  html += `<button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:#f1f5f9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer">✕</button>`
+  html += `<div style="font-size:20px;font-weight:700;color:var(--blue-dark);margin-bottom:4px">${p.nombre||'Sin nombre'}</div>`
+  if (p.descripcion) html += `<div style="font-size:13px;color:#64748b;margin-bottom:12px">${p.descripcion}</div>`
+
+  html += `<div class="section-title">💰 Costos</div>`
+  html += row('FOB China', usd(p.precio_fob_usd))
+  html += row('Broker 7%', usd(broker))
+  html += row('Seguro 0.3%', usd(p.seguro_usd))
+  html += row('Flete (por CBM)', usd(p.flete_metodo_a_usd))
+  html += row('Arancel Israel', p.arancel_tasa ? `${(p.arancel_tasa*100).toFixed(0)}% = ${usd(p.arancel_usd)}` : '— pendiente')
+  html += `<div class="detail-row total"><span>Costo aterrizado</span><span>${usd(p.costo_aterrizado_usd)}</span></div>`
+  html += row('Precio mayorista mín.', usd(p.precio_mayorista_min_usd))
+  html += row('Precio consumidor', usd(p.precio_consumidor_sugerido_usd))
+
+  if (p.packaging_opciones?.length) {
+    html += `<div class="section-title">📦 Packaging</div>`
+    p.packaging_opciones.forEach(op => html += row(op.tipo, `+$${op.precio_adicional_usd} | MOQ ${op.moq}`))
+  }
+  if (p.certificados_faltantes?.length || p.certificados_disponibles?.length) {
+    html += `<div class="section-title">⚖️ Legal Israel</div>`
+    ;(p.certificados_disponibles||[]).forEach(c => html += `<div style="color:var(--green);font-size:13px;margin-bottom:2px">✓ ${c}</div>`)
+    ;(p.certificados_faltantes||[]).forEach(c => html += `<div style="color:var(--red);font-size:13px;margin-bottom:2px">✗ ${c} (falta)</div>`)
+  }
+  if (p.justificacion) {
+    html += `<div class="section-title">📊 Evaluación — ${p.calificacion||'?'}/10</div>`
+    html += `<div style="font-size:13px;color:#334155;line-height:1.5">${p.justificacion}</div>`
+    if (p.fortalezas?.length) html += '<div style="margin-top:8px">' + p.fortalezas.map(f => `<div style="font-size:12px;color:var(--green)">✓ ${f}</div>`).join('') + '</div>'
+    if (p.debilidades?.length) html += p.debilidades.map(d => `<div style="font-size:12px;color:var(--red)">✗ ${d}</div>`).join('')
+  }
+  if (p.notas_calidad) { html += `<div class="section-title">🔬 Calidad</div><div style="font-size:13px;color:#334155">${p.notas_calidad}</div>` }
+  html += '<div style="height:24px"></div>'
+
+  document.getElementById('modal-content').innerHTML = html
+  document.getElementById('modal').classList.add('show')
+}
+
+function row(label, value) { return `<div class="detail-row"><span>${label}</span><span>${value}</span></div>` }
+function closeModal() { document.getElementById('modal').classList.remove('show') }
+
+// ═══════════════════════════════════════
+// NEW PRODUCT
+// ═══════════════════════════════════════
+function newProduct() {
+  showScreen('chat'); messages = []; pendingFicha = null; dismissBanner()
+  document.getElementById('messages').innerHTML = ''
+  addBotMessage('¡Listo! Mandame la foto del siguiente producto.')
+}
+
+// ═══════════════════════════════════════
+// EXPORT EXCEL (CSV que abre en Excel)
+// ═══════════════════════════════════════
+function exportExcel() {
+  if (!products.length) { alert('No hay productos para exportar.'); return }
+  const cols = ['nombre','categoria','rol','proveedor_nombre','proveedor_stand','proveedor_contacto','precio_fob_usd','moq_base','cbm_caja_master','unidades_por_caja','material_principal','calificacion','status','costo_aterrizado_usd','precio_mayorista_min_usd','precio_consumidor_sugerido_usd','arancel_tasa','notas_calidad','justificacion','notas_legales','notas_adicionales','foto_url']
+  const header = cols.join(',')
+  const rows = products.map(p => cols.map(c => {
+    const v = p[c]
+    if (v == null) return ''
+    if (typeof v === 'object') return `"${JSON.stringify(v).replace(/"/g,'""')}"`
+    return `"${String(v).replace(/"/g,'""')}"`
+  }).join(','))
+  const csv = '﻿' + header + '\n' + rows.join('\n') // BOM for Excel Hebrew support
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a'); a.href = url
+  a.download = 'pentaliv-' + new Date().toISOString().slice(0,10) + '.csv'
+  a.click()
+}
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function setSyncStatus(online) {
+  document.getElementById('sync-dot').classList.toggle('offline', !online)
+}
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'show'
+  setTimeout(() => t.className = '', 2500)
+}
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight,100)+'px' }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }
+
+// ═══════════════════════════════════════
+// SYSTEM PROMPT
+// ═══════════════════════════════════════
+function getSystemPrompt(existingProducts) {
+  const prodContext = existingProducts?.length
+    ? '\n\n## PRODUCTOS YA REGISTRADOS (verificar duplicados):\n' + existingProducts.join('\n')
+    : ''
+
+  return `Eres LEVI, el asistente de sourcing de Pentaliv. Tu rol es doble: asesor profesional en tiempo real durante visitas a proveedores en China, y registrador estructurado de evaluaciones de productos.
+
+## DOCTRINA PENTALIV
+- Marca B2B de productos para el hogar bajo etiqueta privada. Importa de China a Israel, vende al por mayor.
+- Categorías foco: cocina funcional, almacenamiento y organización, limpieza, mantenimiento del hogar.
+- Excluido: decoración, vajilla decorativa, textiles de gusto estético.
+- Tres roles: CLASICO (ya se vende bien), STEPUP (valor agregado real demostrable, no gadget), COMPLEMENTO (resuelve micro-problema adyacente; el comprador probablemente no lo tiene ya)
+- Marca privada en todo: impresión directa > in-mold > caja impresa > sticker
+- No el más barato. Competir en calidad dentro del segmento.
+- El viaje es solo scouting. Los pedidos se hacen desde Israel.
+- Costos: broker 7% sobre FOB, seguro 0.3%. Flete y otros componentes pendientes.
+
+## FLUJO POR PRODUCTO
+
+1. IDENTIFICACIÓN: describí lo que ves. Si hay ambigüedad, preguntá. Verificá duplicados con la lista de productos registrados.
+
+2. RECOLECCIÓN (conversacional, de a grupos, no en lista larga):
+   - Ronda 1: precio FOB, MOQ base, dimensiones y peso
+   - Ronda 2: opciones packaging (tipo, precio adicional/u, MOQ de cada opción), lead time
+   - Ronda 3: buscá online criterios de calidad para este material y producto específico. Pedile a Moshe que verifique.
+   - Ronda 4: buscá online qué normativas aplican en Israel para este producto. Indicá qué certificados pedir.
+
+3. EVALUACIÓN: rol, fit doctrina, calidad, viabilidad marca privada, calificación 1-10.
+
+4. FICHA: cuando Moshe diga "guardar", "listo" o "siguiente", generá:
+
+<FICHA_JSON>
+{"nombre":"","descripcion":"","categoria":"","rol":"clasico|stepup|complemento","fit_doctrina":"","proveedor_nombre":"","proveedor_stand":"","proveedor_contacto":"","precio_fob_usd":null,"moq_base":null,"packaging_opciones":[],"lead_time_dias":null,"largo_cm":null,"ancho_cm":null,"alto_cm":null,"peso_kg":null,"cbm_unidad":null,"cbm_caja_master":null,"unidades_por_caja":null,"material_principal":"","criterios_evaluados":[],"notas_calidad":"","muestra_disponible":null,"costo_muestra_usd":null,"normativa_israel":[],"certificados_requeridos":[],"certificados_disponibles":[],"certificados_faltantes":[],"notas_legales":"","arancel_tasa":null,"calificacion":null,"justificacion":"","fortalezas":[],"debilidades":[],"duplicados_vinculados":[],"notas_adicionales":""}
+</FICHA_JSON>
+
+## REGLAS
+- Conversá de a grupos lógicos. No bombardees con listas largas.
+- Buscá calidad y legales online — no improvises.
+- Sé directo si el producto no encaja. Sin adulación.
+- Español rioplatense siempre.${prodContext}`
+}
+</script>
+</body>
+</html>
