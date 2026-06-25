@@ -366,18 +366,21 @@ async function ensureSession() {
 // ═══════════════════════════════════════
 // SETUP
 // ═══════════════════════════════════════
-function saveSetup() {
+async function saveSetup() {
   const ak = document.getElementById('inp-anthropic').value.trim()
   const sk = document.getElementById('inp-supabase-key').value.trim()
   if (!ak || !sk) { alert('Completá los dos campos'); return }
-  apiKey = ak; supabaseKey = sk
-  localStorage.setItem('levi_anthropic_key', ak)
-  localStorage.setItem('levi_supabase_key', sk)
-  initSupabase()
-  ensureSession().then(() => {
+  try {
+    apiKey = ak; supabaseKey = sk
+    localStorage.setItem('levi_anthropic_key', ak)
+    localStorage.setItem('levi_supabase_key', sk)
+    initSupabase()
+    await ensureSession()
     showScreen('chat')
     addBotMessage('¡Todo listo! Soy LEVI. Mandame la foto de un producto y arrancamos.')
-  })
+  } catch(err) {
+    alert('Error al iniciar: ' + err.message)
+  }
 }
 
 // ═══════════════════════════════════════
