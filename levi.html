@@ -80,6 +80,7 @@
   #btn-send:disabled { background: #cbd5e1; }
   #voice-status { font-size: 12px; color: var(--red); text-align: center; margin-top: 6px; display: none; }
   #voice-status.show { display: block; }
+  #btn-voice.recording { background: #fee2e2 !important; color: var(--red) !important; animation: pulse 1s infinite; }
 
   /* DASHBOARD */
   #dashboard-screen { overflow-y: auto; }
@@ -203,10 +204,10 @@
     <div id="input-row">
       <button class="icon-btn" id="btn-camera" onclick="document.getElementById('file-input').click()">📷</button>
       <textarea id="text-input" rows="1" placeholder="Escribí o hablá…" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-      <button class="icon-btn" id="btn-voice" ontouchstart="startVoice(event)" ontouchend="stopVoice(event)" onmousedown="startVoice(event)" onmouseup="stopVoice(event)">🎤</button>
+      <button class="icon-btn" id="btn-voice" onclick="toggleVoice()">🎤</button>
       <button class="icon-btn" id="btn-send" onclick="sendMessage()">➤</button>
     </div>
-    <div id="voice-status">🔴 Hablando... soltá para enviar</div>
+    <div id="voice-status">🔴 Escuchando... tocá 🎤 de nuevo para enviar</div>
   </div>
   <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)">
 </div>
@@ -430,33 +431,41 @@ async function sendMessage() {
 // ═══════════════════════════════════════
 // VOICE
 // ═══════════════════════════════════════
-function startVoice(e) {
-  e.preventDefault()
+function toggleVoice() {
+  if (isRecording) {
+    if (recognition) recognition.stop()
+    return
+  }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  if (!SR) { alert('Usá Chrome en Android o Safari en iPhone para voz.'); return }
+  if (!SR) { alert('Tu browser no soporta voz. Usá Safari en iPhone o Chrome en Android.'); return }
   recognition = new SR()
   recognition.lang = 'es-AR'
-  recognition.continuous = false
+  recognition.continuous = true
   recognition.interimResults = true
-  recognition.onresult = (e) => { document.getElementById('text-input').value = Array.from(e.results).map(r => r[0].transcript).join('') }
+  recognition.onstart = () => {
+    isRecording = true
+    document.getElementById('btn-voice').classList.add('recording')
+    document.getElementById('voice-status').classList.add('show')
+  }
+  recognition.onresult = (e) => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('')
+    document.getElementById('text-input').value = transcript
+  }
   recognition.onend = () => {
     isRecording = false
     document.getElementById('btn-voice').classList.remove('recording')
     document.getElementById('voice-status').classList.remove('show')
-    if (document.getElementById('text-input').value.trim()) sendMessage()
+    const text = document.getElementById('text-input').value.trim()
+    if (text) sendMessage()
   }
-  recognition.onerror = () => {
+  recognition.onerror = (e) => {
     isRecording = false
     document.getElementById('btn-voice').classList.remove('recording')
     document.getElementById('voice-status').classList.remove('show')
+    if (e.error !== 'no-speech') alert('Error de micrófono: ' + e.error)
   }
-  recognition.start()
-  isRecording = true
-  document.getElementById('btn-voice').classList.add('recording')
-  document.getElementById('voice-status').classList.add('show')
+  try { recognition.start() } catch(e) { alert('No se pudo iniciar el micrófono: ' + e.message) }
 }
-
-function stopVoice(e) { e.preventDefault(); if (recognition && isRecording) recognition.stop() }
 
 // ═══════════════════════════════════════
 // IMAGE
