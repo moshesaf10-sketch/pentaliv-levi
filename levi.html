@@ -552,13 +552,18 @@ async function saveProduct() {
       } catch(e) { console.log('Image upload error:', e) }
     }
 
+    // Normalizar rol
+    const rolMap = { clasico:'clasico', clásico:'clasico', classic:'clasico', stepup:'stepup', 'step-up':'stepup', 'step up':'stepup', complemento:'complemento', complement:'complemento' }
+    const rolRaw = (pendingFicha.rol || '').toLowerCase().trim()
+    const rolNorm = rolMap[rolRaw] || null
+
     const costos = calcularCostos(pendingFicha)
     const productData = {
       session_id: sessionId,
       nombre: pendingFicha.nombre,
       descripcion: pendingFicha.descripcion,
       categoria: pendingFicha.categoria,
-      rol: pendingFicha.rol,
+      rol: rolNorm,
       fit_doctrina: pendingFicha.fit_doctrina,
       proveedor_nombre: pendingFicha.proveedor_nombre,
       proveedor_stand: pendingFicha.proveedor_stand,
