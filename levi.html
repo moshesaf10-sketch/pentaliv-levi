@@ -150,6 +150,7 @@
   <div style="display:flex;gap:8px">
     <button class="hbtn" onclick="showScreen('chat')">💬 Chat</button>
     <button class="hbtn" onclick="showScreen('dashboard');loadAndRenderDashboard()">📋 Productos</button>
+    <button class="hbtn" onclick="openSettings()">⚙️</button>
   </div>
 </div>
 
@@ -463,6 +464,30 @@ function showSaveBanner() {
   if (pendingFicha.precio_fob_usd) info.push(`FOB: $${pendingFicha.precio_fob_usd}`)
   document.getElementById('save-product-info').textContent = info.join(' · ')
   document.getElementById('save-banner').classList.add('show')
+}
+
+function openSettings() {
+  const ak = prompt('Anthropic API Key (sk-ant-...):', '')
+  if (ak === null) return
+  if (ak && ak.startsWith('sk-')) {
+    apiKey = ak
+    localStorage.setItem('levi_anthropic_key', ak)
+    showToast('✅ Anthropic key actualizada')
+  } else if (ak) {
+    alert('Key inválida — debe empezar con sk-ant-')
+    return
+  }
+  const sk = prompt('Supabase Key (sb_publishable_ o eyJ...):', '')
+  if (sk === null) return
+  if (sk && (sk.startsWith('sb_') || sk.startsWith('eyJ'))) {
+    supabaseKey = sk
+    localStorage.setItem('levi_supabase_key', sk)
+    initSupabase()
+    ensureSession()
+    showToast('✅ Supabase key actualizada')
+  } else if (sk) {
+    alert('Key inválida')
+  }
 }
 
 function dismissBanner() { document.getElementById('save-banner').classList.remove('show'); pendingFicha = null }
