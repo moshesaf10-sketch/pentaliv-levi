@@ -616,7 +616,6 @@ async function saveProduct() {
   document.getElementById('btn-save').disabled = true
 
   try {
-    // Upload photos to Supabase Storage
     const fotosUrls = []
     for (const url of (pendingFicha._imgUrls || [])) {
       if (url && url.startsWith('data:')) {
@@ -634,7 +633,6 @@ async function saveProduct() {
       }
     }
 
-    // Normalizar rol — guardar cualquier valor, solo normalizar formato
     const rolRaw = (pendingFicha.rol || '').toLowerCase().trim()
       .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
       .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u')
@@ -690,10 +688,8 @@ async function saveProduct() {
     const { data, error } = await sbClient.from('productos').insert(productData).select().single()
     if (error) throw new Error(error.message)
 
-    // Save conversation
     await sbClient.from('conversaciones').insert({ producto_id: data.id, session_id: sessionId, messages: messages })
 
-    // Update local cache
     products.push(data)
     dismissBanner()
     addBotMessage(`✅ "${data.nombre || 'Producto'}" guardado. ¿Siguiente?`)
@@ -836,7 +832,6 @@ function openModal(id) {
   const usd = n => n!=null ? '$'+Number(n).toFixed(2) : '— (pendiente)'
   const broker = p.precio_fob_usd ? p.precio_fob_usd * BROKER_PCT : null
 
-  // Photos gallery
   const allPhotos = (p.fotos_urls && p.fotos_urls.filter(Boolean).length > 0)
     ? p.fotos_urls.filter(Boolean)
     : (p.foto_url ? [p.foto_url] : [])
@@ -850,7 +845,6 @@ function openModal(id) {
   html += `<div style="font-size:20px;font-weight:700;color:var(--blue-dark);margin-bottom:4px">${p.nombre||'Sin nombre'}</div>`
   if (p.descripcion) html += `<div style="font-size:13px;color:#64748b;margin-bottom:12px">${p.descripcion}</div>`
 
-  // Opinión del usuario
   html += `<div class="section-title">💬 Mi opinión</div>`
   html += `<div class="opinion-box">
     <div class="opinion-box-label">Tu opinión personal</div>
@@ -863,7 +857,6 @@ function openModal(id) {
     <button onclick="saveOpinion('${id}')" style="margin-top:6px;padding:7px 16px;background:var(--green);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer">Guardar opinión</button>
   </div>`
 
-  // Costos
   html += `<div class="section-title">💰 Costos</div>`
   html += row('FOB China', usd(p.precio_fob_usd))
   html += row('Broker 7%', usd(broker))
@@ -874,7 +867,6 @@ function openModal(id) {
   html += row('Precio mayorista mín.', usd(p.precio_mayorista_min_usd))
   html += row('Precio consumidor', usd(p.precio_consumidor_sugerido_usd))
 
-  // Packaging
   if (p.packaging_opciones?.length) {
     html += `<div class="section-title">📦 Packaging</div>`
     p.packaging_opciones.forEach(op => {
@@ -883,14 +875,12 @@ function openModal(id) {
     })
   }
 
-  // Legal
   if (p.certificados_faltantes?.length || p.certificados_disponibles?.length) {
     html += `<div class="section-title">⚖️ Legal Israel</div>`
     ;(p.certificados_disponibles||[]).forEach(c => html += `<div style="color:var(--green);font-size:13px;margin-bottom:2px">✓ ${c}</div>`)
     ;(p.certificados_faltantes||[]).forEach(c => html += `<div style="color:var(--red);font-size:13px;margin-bottom:2px">✗ ${c} (falta)</div>`)
   }
 
-  // Evaluación LEVI
   if (p.justificacion) {
     html += `<div class="section-title">📊 Evaluación LEVI — ${p.calificacion||'?'}/10</div>`
     html += `<div style="font-size:13px;color:#334155;line-height:1.5">${p.justificacion}</div>`
@@ -898,10 +888,7 @@ function openModal(id) {
     if (p.debilidades?.length) html += p.debilidades.map(d => `<div style="font-size:12px;color:var(--red)">✗ ${d}</div>`).join('')
   }
 
-  // Calidad
   if (p.notas_calidad) { html += `<div class="section-title">🔬 Calidad</div><div style="font-size:13px;color:#334155">${p.notas_calidad}</div>` }
-
-  // Comentarios adicionales
   if (p.comentarios) { html += `<div class="section-title">📝 Comentarios</div><div style="font-size:13px;color:#334155">${p.comentarios}</div>` }
 
   html += `<div style="height:24px"></div>`
