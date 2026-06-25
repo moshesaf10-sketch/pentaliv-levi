@@ -584,12 +584,14 @@ async function saveProduct() {
   document.getElementById('btn-save').textContent = '⏳ Guardando...'
   document.getElementById('btn-save').disabled = true
 
+  // DEBUG: mostrar cuántas fotos encontramos antes de guardar
+  const rawImgs = (pendingFicha._imgUrls || []).filter(u => u && u.startsWith('data:'))
+  showToast(`📷 ${rawImgs.length} foto(s) detectadas`)
+
   try {
-    // Guardar fotos como base64 comprimido directamente en DB
-    // 400px max, 0.55 quality → ~8-20KB por foto, confiable 100%
+    // Comprimir fotos: 400px max, 0.55 quality → ~8-20KB por foto
     const fotosUrls = []
-    for (const url of (pendingFicha._imgUrls || [])) {
-      if (!url || !url.startsWith('data:')) continue
+    for (const url of rawImgs) {
       try {
         const compressed = await compressImage(url, 400, 0.55)
         fotosUrls.push(compressed)
@@ -657,12 +659,20 @@ async function saveProduct() {
     // Save conversation
     await sbClient.from('conversaciones').insert({ producto_id: data.id, session_id: sessionId, messages: messages })
 
-    // Update local cache
+    // Guardar fotos en localStorage (100% confiable, no depende de Supabase)
+    if (fotosUrls.length > 0) {
+      try { localStorage.setItem(`levi_ph_${data.id}`, JSON.stringify(fotosUrls)) } catch(e) {}
+    }
+
+    // Inyectar fotos en el objeto local (para mostrar inmediatamente sin recargar)
+    data._localPhotos = fotosUrls
+
     products.push(data)
     dismissBanner()
-    addBotMessage(`✅ "${data.nombre || 'Producto'}" guardado. ¿Siguiente?`)
+    addBotMessage(`✅ "${data.nombre || 'Producto'}" guardado${fotosUrls.length > 0 ? ` con ${fotosUrls.length} foto(s)` : ' (sin fotos)'}. ¿Siguiente?`)
     showToast('✅ Guardado en la nube')
   } catch(e) {
+    alert('❌ Error guardando: ' + e.message)
     addBotMessage('❌ Error guardando: ' + e.message)
   } finally {
     document.getElementById('btn-save').textContent = '💾 Guardar'
@@ -689,6 +699,22 @@ function calcularCostos(f) {
     precio_mayorista_min_usd: costo && COST_CONFIG.markup_mayorista ? costo * COST_CONFIG.markup_mayorista : null,
     precio_consumidor_sugerido_usd: (costo && COST_CONFIG.markup_mayorista && COST_CONFIG.markup_consumidor) ? costo * COST_CONFIG.markup_mayorista * COST_CONFIG.markup_consumidor : null
   }
+}
+
+// Obtener fotos de un producto: primero localStorage, luego DB
+function getPhotos(p) {
+  // Fotos inyectadas en memoria (recién guardadas)
+  if (p._localPhotos?.length) return p._localPhotos
+  // Fotos en localStorage
+  try {
+    const local = localStorage.getItem(`levi_ph_${p.id}`)
+    if (local) { const arr = JSON.parse(local); if (arr?.length) return arr }
+  } catch(e) {}
+  // Fotos en Supabase DB
+  const dbPhotos = (p.fotos_urls || []).filter(Boolean)
+  if (dbPhotos.length) return dbPhotos
+  if (p.foto_url) return [p.foto_url]
+  return []
 }
 
 // ═══════════════════════════════════════
@@ -736,7 +762,8 @@ function renderDashboard() {
 }
 
 function productCardHTML(p) {
-  const primaryPhoto = (p.fotos_urls && p.fotos_urls.length > 0) ? p.fotos_urls[0] : p.foto_url
+  const allPhotos = getPhotos(p)
+  const primaryPhoto = allPhotos[0] || null
   const thumb = primaryPhoto
     ? `<div class="product-thumb"><img src="${primaryPhoto}" alt=""></div>`
     : `<div class="product-thumb">📦</div>`
@@ -749,8 +776,8 @@ function productCardHTML(p) {
   const usd = n => n!=null ? '$'+Number(n).toFixed(2) : '—'
   const broker = p.precio_fob_usd ? p.precio_fob_usd * BROKER_PCT : null
   const costoAprox = p.costo_aterrizado_usd || (p.precio_fob_usd && broker ? '~$'+(p.precio_fob_usd + broker).toFixed(2) : '—')
-  const photoCount = (p.fotos_urls?.filter(Boolean).length || 0) + (p.foto_url && !p.fotos_urls?.length ? 1 : 0)
-  const photoIndicator = photoCount > 1 ? `<span style="font-size:10px;color:#94a3b8;margin-left:4px">📷${photoCount}</span>` : ''
+  const photoCount = allPhotos.length
+  const photoIndicator = photoCount > 0 ? `<span style="font-size:10px;color:#94a3b8;margin-left:4px">📷${photoCount}</span>` : ''
 
   return `<div class="product-card">
     <div class="product-card-body">
@@ -816,10 +843,8 @@ function openModal(id) {
   const usd = n => n!=null ? '$'+Number(n).toFixed(2) : '— (pendiente)'
   const broker = p.precio_fob_usd ? p.precio_fob_usd * BROKER_PCT : null
 
-  // Photos gallery
-  const allPhotos = (p.fotos_urls && p.fotos_urls.filter(Boolean).length > 0)
-    ? p.fotos_urls.filter(Boolean)
-    : (p.foto_url ? [p.foto_url] : [])
+  // Photos: localStorage primero, luego DB
+  const allPhotos = getPhotos(p)
 
   let html = `<button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:#f1f5f9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;z-index:1">✕</button>`
 
@@ -833,19 +858,4 @@ function openModal(id) {
   // Opinión del usuario
   html += `<div class="section-title">💬 Mi opinión</div>`
   html += `<div class="opinion-box">
-    <div class="opinion-box-label">Tu opinión personal</div>
-    <div id="opinion-display-${id}">`
-  html += p.opinion_usuario
-    ? `<div class="opinion-box-text">${esc(p.opinion_usuario)}</div>`
-    : `<div class="opinion-placeholder">Sin opinión aún</div>`
-  html += `</div>
-    <textarea id="opinion-input-${id}" class="edit-textarea" style="margin-top:8px;min-height:50px" placeholder="Escribí tu opinión...">${p.opinion_usuario||''}</textarea>
-    <button onclick="saveOpinion('${id}')" style="margin-top:6px;padding:7px 16px;background:var(--green);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer">Guardar opinión</button>
-  </div>`
-
-  // Costos
-  html += `<div class="section-title">💰 Costos</div>`
-  html += row('FOB China', usd(p.precio_fob_usd))
-  html += row('Broker 7%', usd(broker))
-  html += row('Seguro 0.3%', usd(p.seguro_usd))
-  html += row('Flete (po
+    <div class="opinion-box-label"
