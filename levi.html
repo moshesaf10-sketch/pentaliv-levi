@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="LEVI">
-<title>LEVI — Pentaliv</title>
+<title>LEVI â Pentaliv</title>
 <script>
-// Auto-update: cada vez que abre la app, chequea si hay versión nueva
 (async function() {
   try {
     const base = location.origin + location.pathname.replace(/\?.*/, '');
@@ -16,176 +15,214 @@
     if (!tag) return;
     const stored = localStorage.getItem('levi_etag');
     localStorage.setItem('levi_etag', tag);
-    if (stored && stored !== tag) {
-      location.replace(base + '?r=' + Date.now());
-    }
+    if (stored && stored !== tag) location.replace(base + '?r=' + Date.now());
   } catch(e) {}
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --blue: #0369a1; --blue-dark: #0c4a6e;
-    --green: #16a34a; --red: #dc2626; --amber: #d97706;
-    --gray: #6b7280; --gray-light: #f3f4f6;
-  }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue: #0369a1; --blue-dark: #0c4a6e;
+  --green: #16a34a; --red: #dc2626; --amber: #d97706;
+  --gray: #6b7280; --gray-light: #f3f4f6;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-  /* HEADER */
-  #header { background: var(--blue-dark); color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding-top: max(12px, env(safe-area-inset-top)); }
-  #header h1 { font-size: 20px; font-weight: 700; }
-  #header small { font-size: 11px; opacity: 0.7; display: block; }
-  .hbtn { background: rgba(255,255,255,0.15); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; }
-  #sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; margin-left: 6px; }
-  #sync-dot.offline { background: #f59e0b; }
+/* HEADER */
+#header { background: var(--blue-dark); color: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding-top: max(10px, env(safe-area-inset-top)); }
+#header h1 { font-size: 18px; font-weight: 700; }
+#header small { font-size: 11px; opacity: 0.7; display: block; }
+.hbtn { background: rgba(255,255,255,0.15); border: none; color: white; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+#sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; margin-left: 6px; }
+#sync-dot.offline { background: #f59e0b; }
 
-  /* SCREENS */
-  .screen { display: none; flex-direction: column; flex: 1; overflow: hidden; }
-  .screen.active { display: flex; }
+/* SCREENS */
+.screen { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+.screen.active { display: flex; }
 
-  /* SETUP */
-  #setup-screen { justify-content: center; padding: 24px; overflow-y: auto; }
-  #setup-screen h2 { font-size: 22px; font-weight: 700; color: var(--blue-dark); margin-bottom: 6px; }
-  #setup-screen p { color: var(--gray); font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
-  .setup-label { font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px; display: block; }
-  .setup-hint { font-size: 11px; color: var(--gray); margin-bottom: 10px; }
-  .setup-hint a { color: var(--blue); }
-  #setup-screen input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-bottom: 4px; outline: none; }
-  #setup-screen input:focus { border-color: var(--blue); }
-  .btn-primary { width: 100%; background: var(--blue); color: white; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+/* SETUP */
+#setup-screen { justify-content: center; padding: 24px; overflow-y: auto; }
+#setup-screen h2 { font-size: 22px; font-weight: 700; color: var(--blue-dark); margin-bottom: 6px; }
+#setup-screen p { color: var(--gray); font-size: 13px; margin-bottom: 20px; }
+.setup-label { font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px; display: block; }
+.setup-hint { font-size: 11px; color: var(--gray); margin-bottom: 10px; }
+.setup-hint a { color: var(--blue); }
+#setup-screen input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-bottom: 4px; outline: none; }
+#setup-screen input:focus { border-color: var(--blue); }
+.btn-primary { width: 100%; background: var(--blue); color: white; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
 
-  /* CHAT */
-  #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .msg { display: flex; }
-  .msg.user { justify-content: flex-end; }
-  .bubble { max-width: 85%; padding: 12px 14px; border-radius: 18px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
-  .msg.user .bubble { background: var(--blue); color: white; border-bottom-right-radius: 4px; }
-  .msg.assistant .bubble { background: white; color: #1e293b; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-  .bubble img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 6px; display: block; }
-  .bubble .img-row { display: flex; gap: 4px; margin-bottom: 6px; }
-  .bubble .img-row img { flex: 1; height: 80px; max-width: none; width: auto; object-fit: cover; border-radius: 8px; }
-  .msg-time { font-size: 10px; opacity: 0.5; margin-top: 4px; text-align: right; }
-  #typing { display: none; }
-  #typing.show { display: flex; }
-  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 18px; border-bottom-left-radius: 4px; }
-  .dot { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: bounce 1.2s infinite; }
-  .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+/* CAPTURE SCREEN */
+#capture-screen { overflow: hidden; }
 
-  /* SAVE BANNER */
-  #save-banner { display: none; background: #fefce8; border-top: 1px solid #fde68a; padding: 12px 16px; flex-shrink: 0; }
-  #save-banner.show { display: flex; align-items: center; gap: 10px; }
-  #save-banner-text { flex: 1; font-size: 13px; color: #92400e; }
-  #save-banner-text strong { display: block; font-size: 14px; }
-  #btn-save { background: var(--amber); color: white; border: none; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-  #btn-dismiss { background: none; border: none; color: #92400e; font-size: 18px; cursor: pointer; padding: 4px; }
+/* Supplier bar */
+#supplier-bar { background: #1e293b; color: white; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+#supplier-bar-name { font-size: 13px; font-weight: 600; }
+#supplier-bar-sub { font-size: 11px; opacity: 0.6; }
+#btn-change-supplier { background: rgba(255,255,255,0.1); border: none; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
 
-  /* INPUT */
-  #input-area { background: white; border-top: 1px solid #e2e8f0; padding: 10px 12px; flex-shrink: 0; padding-bottom: max(22px, env(safe-area-inset-bottom)); }
-  #img-preview { display: none; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-  .photo-thumb-wrap { position: relative; display: inline-block; }
-  .photo-thumb-wrap img { height: 60px; width: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e8f0; display: block; }
-  .photo-thumb-wrap button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: #334155; color: white; border: none; border-radius: 50%; font-size: 12px; cursor: pointer; line-height: 1; }
-  #input-row { display: flex; gap: 8px; align-items: flex-end; }
-  #text-input { flex: 1; border: 1.5px solid #e2e8f0; border-radius: 22px; padding: 10px 14px; font-size: 15px; resize: none; max-height: 100px; overflow-y: auto; outline: none; font-family: inherit; line-height: 1.4; }
-  #text-input:focus { border-color: var(--blue); }
-  .icon-btn { width: 42px; height: 42px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 18px; -webkit-tap-highlight-color: transparent; }
-  #btn-camera { background: var(--gray-light); color: #334155; }
-  #btn-send { background: var(--blue); color: white; }
-  #btn-send:disabled { background: #cbd5e1; }
+/* Capture states */
+#capture-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; }
+#capture-loading { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.analyzing-text { font-size: 15px; color: var(--gray); }
+.analyzing-dots span { animation: blink 1.2s infinite; display: inline-block; }
+.analyzing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.analyzing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+.big-camera-btn { width: 120px; height: 120px; background: var(--blue); color: white; border: none; border-radius: 50%; font-size: 48px; cursor: pointer; box-shadow: 0 4px 20px rgba(3,105,161,0.35); display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+.big-camera-hint { font-size: 13px; color: var(--gray); text-align: center; }
 
-  /* DASHBOARD */
-  #dashboard-screen { overflow-y: auto; }
-  #dash-header { background: var(--blue-dark); color: white; padding: 16px; flex-shrink: 0; }
-  #dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
-  .stat-card { background: rgba(255,255,255,0.12); border-radius: 12px; padding: 12px 10px; text-align: center; }
-  .stat-num { font-size: 24px; font-weight: 700; }
-  .stat-label { font-size: 11px; opacity: 0.75; margin-top: 2px; }
-  #cbm-bar-wrap { margin-top: 12px; }
-  #cbm-bar-track { height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; }
-  #cbm-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
-  #cbm-label { font-size: 11px; opacity: 0.7; margin-top: 4px; }
-  #dash-filters { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; background: white; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
-  .filter-btn { white-space: nowrap; padding: 6px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 13px; cursor: pointer; color: var(--gray); }
-  .filter-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
-  #products-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
-  .product-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-  .product-card-body { display: flex; gap: 12px; padding: 14px; }
-  .product-thumb { width: 64px; height: 64px; border-radius: 10px; flex-shrink: 0; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 28px; overflow: hidden; }
-  .product-thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .product-info { flex: 1; min-width: 0; }
-  .product-name { font-weight: 600; font-size: 15px; color: #1e293b; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .product-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
-  .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
-  .tag-clasico { background: #dbeafe; color: #1d4ed8; }
-  .tag-stepup { background: #ede9fe; color: #7c3aed; }
-  .tag-complemento { background: #dcfce7; color: #16a34a; }
-  .tag-otro { background: #fef3c7; color: #78350f; }
-  .tag-candidato { background: #fef9c3; color: #854d0e; }
-  .tag-descartado { background: #fee2e2; color: var(--red); }
-  .tag-completo { background: var(--gray-light); color: var(--gray); }
-  .product-nums { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; }
-  .num-cell { font-size: 11px; color: var(--gray); }
-  .num-cell strong { display: block; font-size: 13px; color: #1e293b; }
-  .product-actions { display: flex; border-top: 1px solid #f1f5f9; }
-  .action-btn { flex: 1; padding: 10px; text-align: center; font-size: 13px; cursor: pointer; border: none; background: none; color: var(--gray); }
-  .action-btn.green { color: var(--green); }
-  .action-btn.red { color: var(--red); }
-  .action-btn.blue { color: var(--blue); }
+/* FORM */
+#capture-form { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#form-scroll { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; }
+.form-section { background: white; border-radius: 14px; padding: 14px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+.form-section-title { font-size: 12px; font-weight: 700; color: var(--blue-dark); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.frow { display: flex; gap: 10px; margin-bottom: 8px; }
+.frow:last-child { margin-bottom: 0; }
+.fcol { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.flabel { font-size: 11px; font-weight: 600; color: #64748b; }
+.finput { border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 14px; font-family: inherit; outline: none; width: 100%; background: white; }
+.finput:focus { border-color: var(--blue); }
+.ftextarea { border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 14px; font-family: inherit; outline: none; width: 100%; resize: none; min-height: 60px; }
+.ftextarea:focus { border-color: var(--blue); }
+.fselect { border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 14px; font-family: inherit; outline: none; width: 100%; background: white; -webkit-appearance: none; }
 
-  /* MODAL */
-  #modal { display: none; position: fixed; inset: 0; z-index: 100; }
-  #modal.show { display: flex; flex-direction: column; }
-  #modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
-  #modal-content { position: relative; background: white; border-radius: 24px 24px 0 0; max-height: 92dvh; overflow-y: auto; margin-top: auto; padding: 20px; }
-  .section-title { font-weight: 600; font-size: 14px; color: #334155; margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
-  .detail-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
-  .detail-row span:first-child { color: var(--gray); }
-  .detail-row span:last-child { font-weight: 500; }
-  .detail-row.total span { font-weight: 700; font-size: 15px; color: var(--blue-dark); }
+/* Photo preview in form */
+#form-photos { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.form-photo-wrap { position: relative; }
+.form-photo-wrap img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
+.form-photo-wrap button { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; background: #334155; color: white; border: none; border-radius: 50%; font-size: 10px; cursor: pointer; line-height: 1; }
+.add-photo-btn { width: 70px; height: 70px; border: 2px dashed #cbd5e1; border-radius: 8px; background: var(--gray-light); color: var(--gray); font-size: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 
-  /* EDIT FORM */
-  .edit-label { font-size: 12px; font-weight: 600; color: #334155; margin: 10px 0 4px; display: block; }
-  .edit-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; }
-  .edit-input:focus { border-color: var(--blue); }
-  .edit-textarea { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; resize: vertical; min-height: 70px; }
-  .edit-textarea:focus { border-color: var(--blue); }
-  .btn-edit-save { width: 100%; background: var(--blue); color: white; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 14px; }
-  .btn-edit-cancel { width: 100%; background: var(--gray-light); color: #334155; border: none; border-radius: 12px; padding: 11px; font-size: 14px; cursor: pointer; margin-top: 6px; }
+/* NIS price display */
+#nis-price-display { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 12px; display: none; margin-top: 6px; }
+#nis-price-display .nis-label { font-size: 11px; color: #166534; font-weight: 600; }
+#nis-price-display .nis-value { font-size: 18px; font-weight: 700; color: var(--green); }
 
-  /* OPINION BADGE */
-  .opinion-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 10px 12px; margin-top: 8px; }
-  .opinion-box-label { font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
-  .opinion-box-text { font-size: 13px; color: #166534; }
-  .opinion-placeholder { font-size: 13px; color: #94a3b8; font-style: italic; }
+/* Price table */
+.price-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+.price-table th { font-size: 11px; font-weight: 600; color: #64748b; padding: 4px 6px; text-align: left; }
+.price-table td { padding: 3px 4px; }
+.price-table input { border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; font-size: 14px; width: 100%; outline: none; text-align: right; }
+.price-table input:focus { border-color: var(--blue); }
+.price-table .nis-cell { font-size: 13px; font-weight: 600; color: var(--green); padding: 6px 8px; white-space: nowrap; }
+.btn-add-row { font-size: 12px; color: var(--blue); background: none; border: none; cursor: pointer; padding: 4px 0; }
+.btn-del-row { background: none; border: none; color: #cbd5e1; font-size: 14px; cursor: pointer; padding: 4px; }
+.currency-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.currency-tab { flex: 1; padding: 8px; border: 2px solid #e2e8f0; border-radius: 8px; background: white; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; color: var(--gray); }
+.currency-tab.active { border-color: var(--blue); background: #eff6ff; color: var(--blue); }
 
-  /* GALLERY */
-  .photo-gallery { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
-  .photo-gallery img { height: 160px; width: auto; min-width: 120px; object-fit: cover; border-radius: 12px; flex-shrink: 0; }
-  .photo-gallery img:first-child:last-child { width: 100%; height: 200px; min-width: unset; }
+/* Stars */
+.stars-wrap { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.star { font-size: 28px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
-  /* FAB */
-  #btn-new { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); right: 20px; z-index: 50; width: 56px; height: 56px; background: var(--blue); color: white; border: none; border-radius: 50%; font-size: 28px; box-shadow: 0 4px 12px rgba(3,105,161,0.4); cursor: pointer; display: none; align-items: center; justify-content: center; }
+/* Variants */
+.variant-card { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+.variant-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.variant-title { font-size: 13px; font-weight: 600; color: #334155; }
+.btn-del-variant { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; }
+.btn-add-variant { width: 100%; border: 2px dashed #cbd5e1; background: none; color: var(--gray); border-radius: 10px; padding: 10px; font-size: 13px; cursor: pointer; }
 
-  input[type=file] { display: none; }
+/* Chat fill bar */
+#chat-fill-bar { background: white; border-top: 1px solid #e2e8f0; padding: 8px 12px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+#chat-fill-input { flex: 1; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 8px 14px; font-size: 14px; font-family: inherit; outline: none; }
+#chat-fill-input:focus { border-color: var(--blue); }
+#chat-fill-input::placeholder { color: #94a3b8; font-size: 13px; }
+#btn-chat-fill { width: 36px; height: 36px; background: var(--blue); color: white; border: none; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+#btn-chat-fill:disabled { background: #cbd5e1; }
+.chat-fill-label { font-size: 10px; color: #94a3b8; display: block; margin-bottom: 2px; }
 
-  /* SETTINGS PANEL */
-  #settings-panel { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.5); align-items: flex-end; }
-  #settings-panel.show { display: flex; }
-  #settings-inner { background: white; border-radius: 24px 24px 0 0; padding: 24px; width: 100%; }
-  #settings-inner h3 { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: var(--blue-dark); }
-  #settings-inner input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 11px 14px; font-size: 14px; margin-bottom: 4px; outline: none; font-family: inherit; }
-  #settings-inner input:focus { border-color: var(--blue); }
-  .settings-label { font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px; display: block; margin-top: 12px; }
-  .settings-hint { font-size: 11px; color: var(--gray); margin-bottom: 8px; }
-  #btn-settings-save { width: 100%; background: var(--blue); color: white; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 16px; }
-  #btn-settings-close { width: 100%; background: var(--gray-light); color: #334155; border: none; border-radius: 12px; padding: 11px; font-size: 14px; cursor: pointer; margin-top: 8px; }
+/* Save bar */
+#form-save-bar { background: white; border-top: 1px solid #e2e8f0; padding: 10px 16px; display: flex; gap: 10px; flex-shrink: 0; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+#btn-save-form { flex: 1; background: var(--green); color: white; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; }
+#btn-cancel-form { background: var(--gray-light); color: #334155; border: none; border-radius: 12px; padding: 13px 16px; font-size: 14px; cursor: pointer; }
 
-  /* TOAST */
-  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; display: none; z-index: 200; white-space: nowrap; }
-  #toast.show { display: block; animation: fadeInOut 2.5s forwards; }
-  @keyframes fadeInOut { 0%{opacity:0} 15%{opacity:1} 75%{opacity:1} 100%{opacity:0} }
+/* DASHBOARD */
+#dashboard-screen { overflow-y: auto; }
+#dash-header { background: var(--blue-dark); color: white; padding: 14px 16px; flex-shrink: 0; }
+#dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.stat-card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 8px; text-align: center; }
+.stat-num { font-size: 22px; font-weight: 700; }
+.stat-label { font-size: 10px; opacity: 0.75; margin-top: 2px; }
+#cbm-bar-wrap { margin-top: 10px; }
+#cbm-bar-track { height: 7px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; }
+#cbm-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+#cbm-label { font-size: 11px; opacity: 0.7; margin-top: 3px; }
+#dash-filters { display: flex; gap: 8px; padding: 10px 14px; overflow-x: auto; background: white; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+.filter-btn { white-space: nowrap; padding: 5px 12px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 13px; cursor: pointer; color: var(--gray); }
+.filter-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+#products-list { padding: 10px 14px; display: flex; flex-direction: column; gap: 10px; }
+.product-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.product-card-body { display: flex; gap: 10px; padding: 12px; }
+.product-thumb { width: 60px; height: 60px; border-radius: 8px; flex-shrink: 0; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 26px; overflow: hidden; }
+.product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.product-info { flex: 1; min-width: 0; }
+.product-name { font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.product-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 5px; }
+.tag { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+.tag-candidato { background: #fef9c3; color: #854d0e; }
+.tag-descartado { background: #fee2e2; color: var(--red); }
+.tag-completo { background: var(--gray-light); color: var(--gray); }
+.product-nums { display: grid; grid-template-columns: repeat(3,1fr); gap: 3px; }
+.num-cell { font-size: 10px; color: var(--gray); }
+.num-cell strong { display: block; font-size: 12px; color: #1e293b; }
+.product-actions { display: flex; border-top: 1px solid #f1f5f9; }
+.action-btn { flex: 1; padding: 9px; text-align: center; font-size: 12px; cursor: pointer; border: none; background: none; color: var(--gray); }
+.action-btn.green { color: var(--green); }
+.action-btn.red { color: var(--red); }
+.action-btn.blue { color: var(--blue); }
+
+/* MODAL */
+#modal { display: none; position: fixed; inset: 0; z-index: 100; }
+#modal.show { display: flex; flex-direction: column; }
+#modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+#modal-content { position: relative; background: white; border-radius: 22px 22px 0 0; max-height: 92dvh; overflow-y: auto; margin-top: auto; padding: 20px; }
+.section-title { font-weight: 600; font-size: 13px; color: #334155; margin: 14px 0 6px; padding-bottom: 5px; border-bottom: 1px solid #f1f5f9; }
+.detail-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+.detail-row span:first-child { color: var(--gray); }
+.detail-row span:last-child { font-weight: 500; }
+.photo-gallery { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; }
+.photo-gallery img { height: 150px; width: auto; min-width: 110px; object-fit: cover; border-radius: 10px; flex-shrink: 0; }
+
+/* SUPPLIER MODAL */
+#supplier-modal { display: none; position: fixed; inset: 0; z-index: 200; }
+#supplier-modal.show { display: flex; align-items: flex-end; }
+#supplier-modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+#supplier-modal-inner { position: relative; background: white; border-radius: 22px 22px 0 0; padding: 24px; width: 100%; }
+#supplier-modal-inner h3 { font-size: 17px; font-weight: 700; color: var(--blue-dark); margin-bottom: 6px; }
+#supplier-modal-inner p { font-size: 13px; color: var(--gray); margin-bottom: 16px; }
+#inp-stand { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-size: 16px; outline: none; margin-bottom: 6px; }
+#inp-stand:focus { border-color: var(--blue); }
+
+/* SETTINGS */
+#settings-panel { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.5); align-items: flex-end; }
+#settings-panel.show { display: flex; }
+#settings-inner { background: white; border-radius: 22px 22px 0 0; padding: 22px; width: 100%; }
+#settings-inner h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: var(--blue-dark); }
+#settings-inner input { width: 100%; border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 4px; outline: none; }
+.settings-label { font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px; display: block; margin-top: 10px; }
+.settings-hint { font-size: 11px; color: var(--gray); margin-bottom: 6px; }
+#btn-settings-save { width: 100%; background: var(--blue); color: white; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 14px; }
+#btn-settings-close { width: 100%; background: var(--gray-light); color: #334155; border: none; border-radius: 12px; padding: 10px; font-size: 14px; cursor: pointer; margin-top: 6px; }
+
+/* EDIT FORM */
+.edit-label { font-size: 12px; font-weight: 600; color: #334155; margin: 10px 0 4px; display: block; }
+.edit-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 14px; font-family: inherit; outline: none; }
+.edit-input:focus { border-color: var(--blue); }
+.edit-textarea { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 14px; font-family: inherit; outline: none; resize: vertical; min-height: 60px; }
+.btn-edit-save { width: 100%; background: var(--blue); color: white; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; }
+.btn-edit-cancel { width: 100%; background: var(--gray-light); color: #334155; border: none; border-radius: 12px; padding: 10px; font-size: 13px; cursor: pointer; margin-top: 6px; }
+
+/* FAB */
+#btn-new { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); right: 20px; z-index: 50; width: 52px; height: 52px; background: var(--blue); color: white; border: none; border-radius: 50%; font-size: 26px; box-shadow: 0 4px 12px rgba(3,105,161,0.4); cursor: pointer; display: none; align-items: center; justify-content: center; }
+
+/* TOAST */
+#toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 9px 18px; border-radius: 18px; font-size: 13px; display: none; z-index: 500; white-space: nowrap; }
+#toast.show { display: block; animation: fadeInOut 2.5s forwards; }
+@keyframes fadeInOut { 0%{opacity:0} 15%{opacity:1} 75%{opacity:1} 100%{opacity:0} }
+
+input[type=file] { display: none; }
 </style>
 </head>
 <body>
@@ -193,12 +230,12 @@
 <div id="header">
   <div>
     <h1>LEVI <span id="sync-dot"></span></h1>
-    <small>Pentaliv Sourcing</small>
+    <small id="header-sub">Pentaliv Sourcing</small>
   </div>
-  <div style="display:flex;gap:8px">
-    <button class="hbtn" onclick="showScreen('chat')">💬 Chat</button>
-    <button class="hbtn" onclick="showScreen('dashboard');loadAndRenderDashboard()">📋 Productos</button>
-    <button class="hbtn" onclick="openSettings()">⚙️</button>
+  <div style="display:flex;gap:6px">
+    <button class="hbtn" onclick="showScreen('capture')">ð·</button>
+    <button class="hbtn" onclick="showScreen('dashboard');loadAndRenderDashboard()">ð</button>
+    <button class="hbtn" onclick="openSettings()">âï¸</button>
   </div>
 </div>
 
@@ -206,54 +243,252 @@
 <div id="setup-screen" class="screen active">
   <h2>Configurar LEVI</h2>
   <p>Solo la primera vez. Tus datos quedan guardados en este dispositivo.</p>
-
-  <label class="setup-label">API Key de Anthropic (la IA)</label>
+  <label class="setup-label">API Key de Anthropic</label>
   <input type="password" id="inp-anthropic" placeholder="sk-ant-api03-..." autocomplete="off">
-  <div class="setup-hint">→ <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
-
-  <label class="setup-label">Supabase Anon Key (la base de datos)</label>
+  <div class="setup-hint">â <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> â API Keys</div>
+  <label class="setup-label">Supabase Anon Key</label>
   <input type="password" id="inp-supabase-key" placeholder="eyJhbGci..." autocomplete="off">
-  <div class="setup-hint">→ supabase.com → tu proyecto → Settings → API Keys → <strong>Publishable key</strong> → copiar</div>
-
-  <button class="btn-primary" onclick="saveSetup()">Guardar y empezar →</button>
+  <div class="setup-hint">â supabase.com â tu proyecto â Settings â API Keys â Publishable key</div>
+  <button class="btn-primary" onclick="saveSetup()">Guardar y empezar â</button>
 </div>
 
-<!-- CHAT -->
-<div id="chat-screen" class="screen">
-  <div id="messages"></div>
-  <div id="typing" class="msg assistant">
-    <div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-  </div>
-  <div id="save-banner">
-    <div id="save-banner-text">
-      <strong id="save-product-name">Producto listo</strong>
-      <span id="save-product-info"></span>
+<!-- CAPTURE -->
+<div id="capture-screen" class="screen">
+  <div id="supplier-bar">
+    <div>
+      <div id="supplier-bar-name">Sin proveedor</div>
+      <div id="supplier-bar-sub">SesiÃ³n China 2026</div>
     </div>
-    <button id="btn-save" onclick="saveProduct()">💾 Guardar</button>
-    <button id="btn-dismiss" onclick="dismissBanner()">✕</button>
+    <button id="btn-change-supplier" onclick="showSupplierModal()">Cambiar</button>
   </div>
-  <div id="input-area">
-    <div id="img-preview"></div>
-    <div id="input-row">
-      <button class="icon-btn" id="btn-camera" onclick="document.getElementById('file-input').click()">📷</button>
-      <textarea id="text-input" rows="1" placeholder="Escribí o hablá…" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-      <button class="icon-btn" id="btn-send" onclick="sendMessage()">➤</button>
+
+  <!-- Empty state -->
+  <div id="capture-empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px">
+    <button class="big-camera-btn" onclick="document.getElementById('file-main').click()">ð·</button>
+    <div class="big-camera-hint">FotografiÃ¡ el producto<br><span style="font-size:12px;color:#94a3b8">PodÃ©s seleccionar varias fotos</span></div>
+  </div>
+
+  <!-- Loading -->
+  <div id="capture-loading" style="flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+    <div style="font-size:36px">ð</div>
+    <div class="analyzing-text">Analizando producto<span class="analyzing-dots"><span>.</span><span>.</span><span>.</span></span></div>
+  </div>
+
+  <!-- FORM -->
+  <div id="capture-form" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+    <div id="form-scroll">
+
+      <!-- Fotos -->
+      <div class="form-section">
+        <div class="form-section-title">ð· Fotos</div>
+        <div id="form-photos"></div>
+      </div>
+
+      <!-- IdentificaciÃ³n -->
+      <div class="form-section">
+        <div class="form-section-title">ð¦ Producto</div>
+        <div class="frow">
+          <div class="fcol" style="flex:2">
+            <span class="flabel">Nombre</span>
+            <input class="finput" id="f-nombre" placeholder="Nombre del producto">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fcol">
+            <span class="flabel">Material</span>
+            <input class="finput" id="f-material" placeholder="PlÃ¡stico, acero...">
+          </div>
+          <div class="fcol">
+            <span class="flabel">CategorÃ­a</span>
+            <input class="finput" id="f-categoria" placeholder="Cocina, baÃ±o...">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fcol">
+            <span class="flabel">DescripciÃ³n</span>
+            <textarea class="ftextarea" id="f-descripcion" rows="2" placeholder="QuÃ© es y para quÃ© sirve"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Precio -->
+      <div class="form-section">
+        <div class="form-section-title">ð° Precio</div>
+        <div class="currency-tabs">
+          <button class="currency-tab active" id="tab-yuan" onclick="setCurrency('yuan')">Â¥ Yuan</button>
+          <button class="currency-tab" id="tab-usd" onclick="setCurrency('usd')">$ USD</button>
+        </div>
+        <table class="price-table">
+          <thead><tr><th>Cantidad</th><th>Precio</th><th>NIS consumidor</th><th></th></tr></thead>
+          <tbody id="price-rows">
+            <tr>
+              <td><input type="number" inputmode="numeric" class="qty-input" placeholder="100"></td>
+              <td><input type="number" inputmode="decimal" step="0.01" class="price-input" placeholder="0.00" oninput="updateNIS(this)"></td>
+              <td class="nis-cell">â</td>
+              <td><button class="btn-del-row" onclick="delPriceRow(this)">â</button></td>
+            </tr>
+            <tr>
+              <td><input type="number" inputmode="numeric" class="qty-input" placeholder="500"></td>
+              <td><input type="number" inputmode="decimal" step="0.01" class="price-input" placeholder="0.00" oninput="updateNIS(this)"></td>
+              <td class="nis-cell">â</td>
+              <td><button class="btn-del-row" onclick="delPriceRow(this)">â</button></td>
+            </tr>
+            <tr>
+              <td><input type="number" inputmode="numeric" class="qty-input" placeholder="1000"></td>
+              <td><input type="number" inputmode="decimal" step="0.01" class="price-input" placeholder="0.00" oninput="updateNIS(this)"></td>
+              <td class="nis-cell">â</td>
+              <td><button class="btn-del-row" onclick="delPriceRow(this)">â</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="btn-add-row" onclick="addPriceRow()">+ Agregar fila</button>
+      </div>
+
+      <!-- LogÃ­stica -->
+      <div class="form-section">
+        <div class="form-section-title">ð¦ Embalaje y logÃ­stica</div>
+        <div class="frow">
+          <div class="fcol">
+            <span class="flabel">Tipo embalaje</span>
+            <select class="fselect" id="f-embalaje-tipo">
+              <option value="">â Seleccionar â</option>
+              <option value="individual">Caja individual</option>
+              <option value="bulk">Bulk / granel</option>
+              <option value="gift_box">Gift box</option>
+              <option value="polybag">Polybag</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fcol">
+            <span class="flabel">Unid/caja interna</span>
+            <input class="finput" id="f-uds-caja-interna" type="number" inputmode="numeric" placeholder="12">
+          </div>
+          <div class="fcol">
+            <span class="flabel">Unid/carton master</span>
+            <input class="finput" id="f-uds-carton" type="number" inputmode="numeric" placeholder="48">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fcol">
+            <span class="flabel">Largo carton (cm)</span>
+            <input class="finput" id="f-largo-carton" type="number" inputmode="decimal" placeholder="60" oninput="calcCBM()">
+          </div>
+          <div class="fcol">
+            <span class="flabel">Ancho (cm)</span>
+            <input class="finput" id="f-ancho-carton" type="number" inputmode="decimal" placeholder="40" oninput="calcCBM()">
+          </div>
+          <div class="fcol">
+            <span class="flabel">Alto (cm)</span>
+            <input class="finput" id="f-alto-carton" type="number" inputmode="decimal" placeholder="30" oninput="calcCBM()">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fcol">
+            <span class="flabel">CBM carton</span>
+            <input class="finput" id="f-cbm" type="number" inputmode="decimal" step="0.001" placeholder="Auto">
+          </div>
+          <div class="fcol">
+            <span class="flabel">Peso carton (kg)</span>
+            <input class="finput" id="f-peso-carton" type="number" inputmode="decimal" step="0.1" placeholder="8.5">
+          </div>
+        </div>
+      </div>
+
+      <!-- Producto fÃ­sico -->
+      <div class="form-section">
+        <div class="form-section-title">ð Medidas del producto</div>
+        <div class="frow">
+          <div class="fcol">
+            <span class="flabel">Largo (cm)</span>
+            <input class="finput" id="f-largo-prod" type="number" inputmode="decimal" placeholder="25">
+          </div>
+          <div class="fcol">
+            <span class="flabel">Ancho (cm)</span>
+            <input class="finput" id="f-ancho-prod" type="number" inputmode="decimal" placeholder="15">
+          </div>
+          <div class="fcol">
+            <span class="flabel">Alto (cm)</span>
+            <input class="finput" id="f-alto-prod" type="number" inputmode="decimal" placeholder="10">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fcol">
+            <span class="flabel">Peso unitario (kg)</span>
+            <input class="finput" id="f-peso-unidad" type="number" inputmode="decimal" step="0.001" placeholder="0.250">
+          </div>
+          <div class="fcol">
+            <span class="flabel">Colores/variantes</span>
+            <input class="finput" id="f-colores" placeholder="Rojo, azul, verde">
+          </div>
+        </div>
+      </div>
+
+      <!-- Calidad -->
+      <div class="form-section">
+        <div class="form-section-title">â­ Calidad percibida</div>
+        <div class="stars-wrap" id="stars-wrap">
+          <span class="star" onclick="setStar(1)">â</span>
+          <span class="star" onclick="setStar(2)">â</span>
+          <span class="star" onclick="setStar(3)">â</span>
+          <span class="star" onclick="setStar(4)">â</span>
+          <span class="star" onclick="setStar(5)">â</span>
+          <span id="star-label" style="font-size:13px;color:var(--gray);margin-left:4px"></span>
+        </div>
+        <textarea class="ftextarea" id="f-calidad-notas" placeholder="Notas de calidad: acabado, materiales, construcciÃ³n..."></textarea>
+      </div>
+
+      <!-- Documentos -->
+      <div class="form-section">
+        <div class="form-section-title">ð Documentos internacionales disponibles</div>
+        <textarea class="ftextarea" id="f-documentos" placeholder="CE, FDA, LFGB, RoHS, etc. â lo que el proveedor muestra o tiene"></textarea>
+      </div>
+
+      <!-- Notas -->
+      <div class="form-section">
+        <div class="form-section-title">ð Notas</div>
+        <textarea class="ftextarea" id="f-notas" placeholder="Cualquier info adicional relevante del momento..."></textarea>
+      </div>
+
+      <!-- Variantes -->
+      <div class="form-section">
+        <div class="form-section-title">ð¨ Variantes (color / tamaÃ±o)</div>
+        <div id="variants-list"></div>
+        <button class="btn-add-variant" onclick="addVariant()">+ Agregar variante</button>
+      </div>
+
+      <div style="height:8px"></div>
+    </div>
+
+    <!-- Chat fill -->
+    <div id="chat-fill-bar">
+      <div style="flex:1">
+        <span class="chat-fill-label">Dictate info a LEVI</span>
+        <input id="chat-fill-input" placeholder='ej: "10 yuan x100, 8 x500, caja de 12, 3kg, gift box"' onkeydown="if(event.key==='Enter')sendChatFill()">
+      </div>
+      <button id="btn-chat-fill" onclick="sendChatFill()">â¤</button>
+    </div>
+
+    <!-- Save bar -->
+    <div id="form-save-bar">
+      <button id="btn-cancel-form" onclick="cancelCapture()">â</button>
+      <button id="btn-save-form" onclick="saveCaptureForm()">ð¾ Guardar producto</button>
     </div>
   </div>
-  <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)">
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard-screen" class="screen">
   <div id="dash-header">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-weight:700;font-size:18px">Productos <span id="dash-count" style="font-size:13px;font-weight:400;opacity:0.7"></span></div>
-      <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer">📥 Excel</button>
+      <div style="font-weight:700;font-size:17px">Productos <span id="dash-count" style="font-size:12px;font-weight:400;opacity:0.7"></span></div>
+      <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer">ð¥ Excel</button>
     </div>
     <div id="dash-stats">
       <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Evaluados</div></div>
       <div class="stat-card"><div class="stat-num" id="stat-candidatos">0</div><div class="stat-label">Candidatos</div></div>
-      <div class="stat-card"><div class="stat-num" id="stat-cbm">0</div><div class="stat-label">CBM usado</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-cbm">0</div><div class="stat-label">CBM</div></div>
     </div>
     <div id="cbm-bar-wrap">
       <div id="cbm-bar-track"><div id="cbm-bar-fill"></div></div>
@@ -262,79 +497,87 @@
   </div>
   <div id="dash-filters">
     <button class="filter-btn active" onclick="setFilter('todos',this)">Todos</button>
-    <button class="filter-btn" onclick="setFilter('candidato',this)">⭐ Candidatos</button>
-    <button class="filter-btn" onclick="setFilter('clasico',this)">Clásicos</button>
-    <button class="filter-btn" onclick="setFilter('stepup',this)">Step-up</button>
-    <button class="filter-btn" onclick="setFilter('complemento',this)">Complementos</button>
+    <button class="filter-btn" onclick="setFilter('candidato',this)">â­ Candidatos</button>
     <button class="filter-btn" onclick="setFilter('descartado',this)">Descartados</button>
   </div>
   <div id="products-list"></div>
 </div>
 
-<button id="btn-new" onclick="newProduct()">＋</button>
+<button id="btn-new" onclick="startNewCapture()">ï¼</button>
 
+<!-- MODAL -->
 <div id="modal">
   <div id="modal-backdrop" onclick="closeModal()"></div>
   <div id="modal-content"></div>
 </div>
 
-<div id="toast"></div>
+<!-- SUPPLIER MODAL -->
+<div id="supplier-modal">
+  <div id="supplier-modal-bg" onclick="closeSupplierModal()"></div>
+  <div id="supplier-modal-inner">
+    <h3>ðª Proveedor actual</h3>
+    <p>NÃºmero de stand / nombre del puesto en Yiwu</p>
+    <input type="text" id="inp-stand" placeholder="Ej: A3-205, Hall 5 Stand 123..." autocomplete="off">
+    <button class="btn-primary" onclick="saveSupplier()">Confirmar proveedor</button>
+  </div>
+</div>
 
-<!-- SETTINGS PANEL -->
+<!-- SETTINGS -->
 <div id="settings-panel">
   <div id="settings-inner">
-    <h3>⚙️ Configuración de keys</h3>
+    <h3>âï¸ ConfiguraciÃ³n</h3>
     <label class="settings-label">Anthropic API Key</label>
-    <input type="password" id="settings-anthropic" placeholder="sk-ant-api03-..." autocomplete="off">
-    <div class="settings-hint">platform.claude.com → API Keys</div>
-    <label class="settings-label">Supabase Publishable Key</label>
-    <input type="password" id="settings-supabase" placeholder="sb_publishable_... o eyJ..." autocomplete="off">
-    <div class="settings-hint">supabase.com → tu proyecto → Settings → API Keys</div>
+    <input type="password" id="settings-anthropic" placeholder="sk-ant-..." autocomplete="off">
+    <div class="settings-hint">platform.claude.com â API Keys</div>
+    <label class="settings-label">Supabase Key</label>
+    <input type="password" id="settings-supabase" placeholder="eyJ..." autocomplete="off">
     <button id="btn-settings-save" onclick="saveSettingsPanel()">Guardar</button>
     <button id="btn-settings-close" onclick="closeSettings()">Cancelar</button>
   </div>
 </div>
 
+<div id="toast"></div>
+
+<!-- FILE INPUTS -->
+<input type="file" id="file-main" accept="image/*" multiple onchange="handleMainPhotos(event)">
+<input type="file" id="file-more" accept="image/*" multiple onchange="handleMorePhotos(event)">
+<input type="file" id="file-variant" accept="image/*" onchange="handleVariantPhoto(event)">
+
 <script>
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 // CONFIG
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 const SUPABASE_URL = 'https://vnxyxpbeinigxkueusfa.supabase.co'
-const BROKER_PCT = 0.07
-const SEGURO_PCT = 0.003
 const CBM_CONTAINER = 67
-const SESSION_NAME = 'China Junio 2026'
+const YUAN_TO_NIS = 3
+const USD_TO_NIS = 20
 
-const COST_CONFIG = {
-  flete_por_cbm: null,
-  honorarios: null,
-  markup_mayorista: null,
-  markup_consumidor: null,
-}
-
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 // STATE
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 let apiKey = localStorage.getItem('levi_anthropic_key') || ''
 let supabaseKey = localStorage.getItem('levi_supabase_key') || ''
 let sbClient = null
 let sessionId = localStorage.getItem('levi_session_id') || null
-let messages = []
-let pendingPhotos = []          // [{base64, type, previewUrl}] — fotos del mensaje actual
-let allConversationImgUrls = [] // acumula TODAS las fotos del producto actual
-let pendingFicha = null
+let currentSupplier = localStorage.getItem('levi_supplier') || ''
 let products = []
 let currentFilter = 'todos'
+let capturePhotos = []    // [{base64, type, previewUrl}]
+let captureVariants = []  // [{id, name, photos, precios}]
+let currentCurrency = 'yuan'
+let currentStarRating = 0
+let pendingVariantIdx = null
 
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 // INIT
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 window.onload = async () => {
   if (apiKey && supabaseKey) {
     initSupabase()
     await ensureSession()
-    showScreen('chat')
-    addBotMessage('¡Hola! Soy LEVI. Mandame la foto de un producto y arrancamos.')
+    showScreen('capture')
+    updateSupplierBar()
+    if (!currentSupplier) showSupplierModal()
   }
 }
 
@@ -345,221 +588,561 @@ function initSupabase() {
 
 async function ensureSession() {
   if (sessionId) return
+  const SESSION_NAME = 'China Junio 2026'
   try {
-    const { data, error } = await sbClient.from('sessions').select('id').eq('nombre', SESSION_NAME).single()
+    const { data } = await sbClient.from('sessions').select('id').eq('nombre', SESSION_NAME).single()
     if (data) { sessionId = data.id; localStorage.setItem('levi_session_id', sessionId); return }
-    const { data: newSession } = await sbClient.from('sessions').insert({ nombre: SESSION_NAME, cbm_total_container: CBM_CONTAINER }).select('id').single()
-    if (newSession) { sessionId = newSession.id; localStorage.setItem('levi_session_id', sessionId) }
-  } catch(e) { console.log('session error:', e) }
+    const { data: ns } = await sbClient.from('sessions').insert({ nombre: SESSION_NAME, cbm_total_container: CBM_CONTAINER }).select('id').single()
+    if (ns) { sessionId = ns.id; localStorage.setItem('levi_session_id', sessionId) }
+  } catch(e) {}
 }
 
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 // SETUP
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 async function saveSetup() {
   const ak = document.getElementById('inp-anthropic').value.trim()
   const sk = document.getElementById('inp-supabase-key').value.trim()
-  if (!ak || !sk) { alert('Completá los dos campos'); return }
-  try {
-    apiKey = ak; supabaseKey = sk
-    localStorage.setItem('levi_anthropic_key', ak)
-    localStorage.setItem('levi_supabase_key', sk)
-    initSupabase()
-    await ensureSession()
-    showScreen('chat')
-    addBotMessage('¡Todo listo! Soy LEVI. Mandame la foto de un producto y arrancamos.')
-  } catch(err) {
-    alert('Error al iniciar: ' + err.message)
-  }
+  if (!ak || !sk) { alert('CompletÃ¡ los dos campos'); return }
+  apiKey = ak; supabaseKey = sk
+  localStorage.setItem('levi_anthropic_key', ak)
+  localStorage.setItem('levi_supabase_key', sk)
+  initSupabase()
+  await ensureSession()
+  showScreen('capture')
+  updateSupplierBar()
+  showSupplierModal()
 }
 
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 // SCREENS
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
   document.getElementById(name + '-screen').classList.add('active')
   document.getElementById('btn-new').style.display = name === 'dashboard' ? 'flex' : 'none'
 }
 
-// ═══════════════════════════════════════
-// MESSAGES
-// ═══════════════════════════════════════
-function addBotMessage(text) {
-  messages.push({ role: 'assistant', content: text })
-  renderMessage({ role: 'assistant', content: text })
+// âââââââââââââââââââââââââââââââ
+// SUPPLIER
+// âââââââââââââââââââââââââââââââ
+function showSupplierModal() {
+  document.getElementById('inp-stand').value = currentSupplier
+  document.getElementById('supplier-modal').classList.add('show')
+  setTimeout(() => document.getElementById('inp-stand').focus(), 200)
 }
 
-function renderMessage(msg) {
-  const el = document.getElementById('messages')
-  const div = document.createElement('div')
-  div.className = 'msg ' + msg.role
-  const text = typeof msg.content === 'string' ? msg.content : (msg.content.find?.(b => b.type === 'text')?.text || '')
-  const imgUrls = msg._imgUrls || (msg._imgUrl ? [msg._imgUrl] : [])
-  const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+function closeSupplierModal() {
+  document.getElementById('supplier-modal').classList.remove('show')
+}
 
-  let imgHtml = ''
-  if (imgUrls.length === 1) {
-    imgHtml = `<img src="${imgUrls[0]}">`
-  } else if (imgUrls.length > 1) {
-    imgHtml = `<div class="img-row">${imgUrls.map(u => `<img src="${u}">`).join('')}</div>`
+function saveSupplier() {
+  const val = document.getElementById('inp-stand').value.trim()
+  if (!val) { alert('IngresÃ¡ el nÃºmero de stand'); return }
+  currentSupplier = val
+  localStorage.setItem('levi_supplier', val)
+  updateSupplierBar()
+  closeSupplierModal()
+}
+
+function updateSupplierBar() {
+  document.getElementById('supplier-bar-name').textContent = currentSupplier ? `Stand: ${currentSupplier}` : 'Sin proveedor'
+}
+
+// âââââââââââââââââââââââââââââââ
+// PHOTO CAPTURE
+// âââââââââââââââââââââââââââââââ
+async function handleMainPhotos(e) {
+  const files = Array.from(e.target.files)
+  if (!files.length) return
+  e.target.value = ''
+  capturePhotos = []
+  captureVariants = []
+  currentStarRating = 0
+
+  for (const file of files) {
+    const dataUrl = await readFile(file)
+    capturePhotos.push({ base64: dataUrl.split(',')[1], type: file.type, previewUrl: dataUrl })
   }
 
-  div.innerHTML = `<div class="bubble">${imgHtml}${esc(text)}<div class="msg-time">${time}</div></div>`
-  el.appendChild(div)
-  el.scrollTop = el.scrollHeight
+  showCaptureState('loading')
+  const prefill = await analyzePhotos(capturePhotos)
+  showCaptureState('form')
+  renderForm(prefill)
 }
 
-function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
-}
-
-// ═══════════════════════════════════════
-// SEND
-// ═══════════════════════════════════════
-async function sendMessage() {
-  const input = document.getElementById('text-input')
-  const text = input.value.trim()
-  if (!text && !pendingPhotos.length) return
-
-  let content
-  if (pendingPhotos.length > 0) {
-    content = [
-      ...pendingPhotos.map(p => ({ type: 'image', source: { type: 'base64', media_type: p.type, data: p.base64 } })),
-      { type: 'text', text: text || 'Evaluá este producto.' }
-    ]
-  } else {
-    content = text
+async function handleMorePhotos(e) {
+  const files = Array.from(e.target.files)
+  if (!files.length) return
+  e.target.value = ''
+  for (const file of files) {
+    const dataUrl = await readFile(file)
+    capturePhotos.push({ base64: dataUrl.split(',')[1], type: file.type, previewUrl: dataUrl })
   }
+  renderFormPhotos()
+}
 
-  const imgUrls = pendingPhotos.map(p => p.previewUrl)
-  // Acumular fotos de TODOS los mensajes del producto actual
-  allConversationImgUrls.push(...imgUrls)
-  messages.push({ role: 'user', content, _imgUrls: imgUrls })
-  renderMessage({ role: 'user', content, _imgUrls: imgUrls })
+function readFile(file) {
+  return new Promise(resolve => {
+    const r = new FileReader()
+    r.onload = ev => resolve(ev.target.result)
+    r.readAsDataURL(file)
+  })
+}
 
-  input.value = ''; input.style.height = 'auto'
-  clearPhotos()
+function showCaptureState(state) {
+  document.getElementById('capture-empty').style.display = state === 'empty' ? 'flex' : 'none'
+  document.getElementById('capture-loading').style.display = state === 'loading' ? 'flex' : 'none'
+  document.getElementById('capture-form').style.display = state === 'form' ? 'flex' : 'none'
+}
 
-  document.getElementById('typing').classList.add('show')
-  document.getElementById('messages').scrollTop = 9999
-
-  try {
-    const existingProducts = products.slice(-20).map(p => `- ${p.nombre||'?'} | ${p.categoria||''} | FOB:$${p.precio_fob_usd||'?'} | Stand:${p.proveedor_stand||'?'}`)
-
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        apiKey,
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1024,
-        system: getSystemPrompt(existingProducts),
-        // Solo últimos 10 mensajes para mayor velocidad
-        messages: messages.filter(m => m.role === 'user' || m.role === 'assistant').slice(-10).map(m => ({ role: m.role, content: m.content }))
-      })
+// âââââââââââââââââââââââââââââââ
+// AI CALLS
+// âââââââââââââââââââââââââââââââ
+async function callHaiku(system, userContent) {
+  const resp = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      apiKey,
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 512,
+      system,
+      messages: [{ role: 'user', content: userContent }]
     })
-    if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || resp.statusText) }
-    const data = await resp.json()
-    const assistantText = data.content.find(b => b.type === 'text')?.text || ''
+  })
+  if (!resp.ok) throw new Error((await resp.json()).error?.message || resp.statusText)
+  const data = await resp.json()
+  return data.content.find(b => b.type === 'text')?.text || ''
+}
 
-    document.getElementById('typing').classList.remove('show')
-    messages.push({ role: 'assistant', content: assistantText })
-    renderMessage({ role: 'assistant', content: assistantText })
+async function analyzePhotos(photos) {
+  try {
+    const content = [
+      ...photos.slice(0,3).map(p => ({ type: 'image', source: { type: 'base64', media_type: p.type, data: p.base64 } })),
+      { type: 'text', text: 'AnalizÃ¡ este producto y devolvÃ© el JSON.' }
+    ]
+    const text = await callHaiku(
+      `Sos LEVI, asistente de captura de campo de Pentaliv en Yiwu China.
+Al recibir fotos de un producto, devolvÃ©s ÃNICAMENTE este JSON con los campos que podÃ©s inferir con certeza. No escribas nada mÃ¡s.
 
-    const fichaMatch = assistantText.match(/<FICHA_JSON>([\s\S]*?)<\/FICHA_JSON>/)
-    if (fichaMatch) {
-      try {
-        pendingFicha = JSON.parse(fichaMatch[1].trim())
-        // Usar TODAS las fotos acumuladas durante la conversación
-        pendingFicha._imgUrls = [...allConversationImgUrls]
-        showSaveBanner()
-      } catch(e) {}
+<PREFILL_JSON>
+{"nombre":"nombre descriptivo en espaÃ±ol","material":"material principal","categoria":"categorÃ­a (cocina/organizaciÃ³n/baÃ±o/limpieza/otro)","descripcion":"quÃ© es y para quÃ© sirve en 1 frase"}
+</PREFILL_JSON>`,
+      content
+    )
+    const match = text.match(/<PREFILL_JSON>([\s\S]*?)<\/PREFILL_JSON>/)
+    if (match) return JSON.parse(match[1].trim())
+  } catch(e) { console.log('analyze error', e) }
+  return {}
+}
+
+async function sendChatFill() {
+  const input = document.getElementById('chat-fill-input')
+  const text = input.value.trim()
+  if (!text) return
+  const btn = document.getElementById('btn-chat-fill')
+  btn.disabled = true
+  input.value = ''
+  try {
+    const currentState = getFormState()
+    const response = await callHaiku(
+      `Sos LEVI, asistente de captura de campo de Pentaliv.
+El usuario te dicta info del proveedor en lenguaje natural. ExtraÃ© los datos y devolvÃ© SOLO el JSON con los campos que mencionÃ³. Si no mencionÃ³ un campo, no lo incluyas.
+
+Campos posibles:
+- precio_moneda: "yuan" o "usd"
+- precios: [{cantidad:number, precio:number}]
+- embalaje_tipo: "individual"/"bulk"/"gift_box"/"polybag"/"otro"
+- uds_caja_interna: number
+- uds_carton: number
+- largo_carton_cm, ancho_carton_cm, alto_carton_cm: number
+- peso_carton_kg: number
+- largo_prod_cm, ancho_prod_cm, alto_prod_cm: number
+- peso_unidad_kg: number
+- colores: string
+- calidad_estrellas: number (1-5)
+- calidad_notas: string
+- documentos: string
+- notas: string
+- nombre: string
+- material: string
+- descripcion: string
+
+<FILL_JSON>
+{}
+</FILL_JSON>`,
+      text
+    )
+    const match = response.match(/<FILL_JSON>([\s\S]*?)<\/FILL_JSON>/)
+    if (match) {
+      applyFillJSON(JSON.parse(match[1].trim()))
+      showToast('â Campos actualizados')
     }
   } catch(e) {
-    document.getElementById('typing').classList.remove('show')
-    addBotMessage('❌ Error: ' + e.message)
+    showToast('â Error: ' + e.message)
+  }
+  btn.disabled = false
+}
+
+function applyFillJSON(data) {
+  if (data.nombre) setVal('f-nombre', data.nombre)
+  if (data.material) setVal('f-material', data.material)
+  if (data.descripcion) setVal('f-descripcion', data.descripcion)
+  if (data.precio_moneda) setCurrency(data.precio_moneda)
+  if (data.precios?.length) {
+    const tbody = document.getElementById('price-rows')
+    // Fill existing rows first, add if needed
+    data.precios.forEach((p, i) => {
+      let rows = tbody.querySelectorAll('tr')
+      if (i >= rows.length) addPriceRow()
+      rows = tbody.querySelectorAll('tr')
+      const row = rows[i]
+      if (row) {
+        row.querySelector('.qty-input').value = p.cantidad || ''
+        const priceInput = row.querySelector('.price-input')
+        priceInput.value = p.precio || ''
+        updateNIS(priceInput)
+      }
+    })
+  }
+  if (data.embalaje_tipo) setVal('f-embalaje-tipo', data.embalaje_tipo)
+  if (data.uds_caja_interna) setVal('f-uds-caja-interna', data.uds_caja_interna)
+  if (data.uds_carton) setVal('f-uds-carton', data.uds_carton)
+  if (data.largo_carton_cm) { setVal('f-largo-carton', data.largo_carton_cm); calcCBM() }
+  if (data.ancho_carton_cm) { setVal('f-ancho-carton', data.ancho_carton_cm); calcCBM() }
+  if (data.alto_carton_cm) { setVal('f-alto-carton', data.alto_carton_cm); calcCBM() }
+  if (data.peso_carton_kg) setVal('f-peso-carton', data.peso_carton_kg)
+  if (data.largo_prod_cm) setVal('f-largo-prod', data.largo_prod_cm)
+  if (data.ancho_prod_cm) setVal('f-ancho-prod', data.ancho_prod_cm)
+  if (data.alto_prod_cm) setVal('f-alto-prod', data.alto_prod_cm)
+  if (data.peso_unidad_kg) setVal('f-peso-unidad', data.peso_unidad_kg)
+  if (data.colores) setVal('f-colores', data.colores)
+  if (data.calidad_estrellas) setStar(data.calidad_estrellas)
+  if (data.calidad_notas) setVal('f-calidad-notas', data.calidad_notas)
+  if (data.documentos) setVal('f-documentos', data.documentos)
+  if (data.notas) setVal('f-notas', data.notas)
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id)
+  if (el) el.value = val
+}
+
+// âââââââââââââââââââââââââââââââ
+// FORM RENDERING
+// âââââââââââââââââââââââââââââââ
+function renderForm(prefill = {}) {
+  // Reset
+  resetFormFields()
+  currentCurrency = 'yuan'
+  document.getElementById('tab-yuan').classList.add('active')
+  document.getElementById('tab-usd').classList.remove('active')
+  currentStarRating = 0
+  renderStars(0)
+  captureVariants = []
+  document.getElementById('variants-list').innerHTML = ''
+
+  // Apply prefill
+  if (prefill.nombre) setVal('f-nombre', prefill.nombre)
+  if (prefill.material) setVal('f-material', prefill.material)
+  if (prefill.categoria) setVal('f-categoria', prefill.categoria)
+  if (prefill.descripcion) setVal('f-descripcion', prefill.descripcion)
+
+  renderFormPhotos()
+  document.getElementById('form-scroll').scrollTop = 0
+}
+
+function resetFormFields() {
+  ['f-nombre','f-material','f-categoria','f-descripcion','f-embalaje-tipo',
+   'f-uds-caja-interna','f-uds-carton','f-largo-carton','f-ancho-carton','f-alto-carton',
+   'f-cbm','f-peso-carton','f-largo-prod','f-ancho-prod','f-alto-prod',
+   'f-peso-unidad','f-colores','f-calidad-notas','f-documentos','f-notas'].forEach(id => {
+    const el = document.getElementById(id)
+    if (el) el.value = ''
+  })
+  // Reset price rows to 3 empty rows
+  const tbody = document.getElementById('price-rows')
+  tbody.innerHTML = ''
+  for (let i = 0; i < 3; i++) addPriceRow()
+}
+
+function renderFormPhotos() {
+  const container = document.getElementById('form-photos')
+  container.innerHTML = capturePhotos.map((p, i) =>
+    `<div class="form-photo-wrap">
+      <img src="${p.previewUrl}" alt="">
+      <button onclick="removeFormPhoto(${i})">â</button>
+    </div>`
+  ).join('') +
+  `<div class="add-photo-btn" onclick="document.getElementById('file-more').click()">+</div>`
+}
+
+function removeFormPhoto(i) {
+  capturePhotos.splice(i, 1)
+  renderFormPhotos()
+}
+
+// âââââââââââââââââââââââââââââââ
+// PRICE TABLE
+// âââââââââââââââââââââââââââââââ
+function setCurrency(cur) {
+  currentCurrency = cur
+  document.getElementById('tab-yuan').classList.toggle('active', cur === 'yuan')
+  document.getElementById('tab-usd').classList.toggle('active', cur === 'usd')
+  // Recalc all NIS cells
+  document.querySelectorAll('#price-rows .price-input').forEach(inp => updateNIS(inp))
+}
+
+function updateNIS(priceInput) {
+  const row = priceInput.closest('tr')
+  const nisCell = row.querySelector('.nis-cell')
+  const price = parseFloat(priceInput.value)
+  if (!price || isNaN(price)) { nisCell.textContent = 'â'; return }
+  const multiplier = currentCurrency === 'yuan' ? YUAN_TO_NIS : USD_TO_NIS
+  nisCell.textContent = 'âª' + (price * multiplier).toFixed(0)
+}
+
+function addPriceRow() {
+  const tbody = document.getElementById('price-rows')
+  const tr = document.createElement('tr')
+  tr.innerHTML = `
+    <td><input type="number" inputmode="numeric" class="qty-input" placeholder="â"></td>
+    <td><input type="number" inputmode="decimal" step="0.01" class="price-input" placeholder="0.00" oninput="updateNIS(this)"></td>
+    <td class="nis-cell">â</td>
+    <td><button class="btn-del-row" onclick="delPriceRow(this)">â</button></td>`
+  tbody.appendChild(tr)
+}
+
+function delPriceRow(btn) {
+  const rows = document.querySelectorAll('#price-rows tr')
+  if (rows.length <= 1) return
+  btn.closest('tr').remove()
+}
+
+// âââââââââââââââââââââââââââââââ
+// CBM AUTO-CALC
+// âââââââââââââââââââââââââââââââ
+function calcCBM() {
+  const l = parseFloat(document.getElementById('f-largo-carton').value)
+  const a = parseFloat(document.getElementById('f-ancho-carton').value)
+  const h = parseFloat(document.getElementById('f-alto-carton').value)
+  if (l && a && h) {
+    document.getElementById('f-cbm').value = (l * a * h / 1000000).toFixed(4)
   }
 }
 
-// ═══════════════════════════════════════
-// IMAGES (multi-photo)
-// ═══════════════════════════════════════
-function handleImage(e) {
-  const file = e.target.files[0]; if (!file) return
-  const reader = new FileReader()
-  reader.onload = (ev) => {
-    const full = ev.target.result
-    const base64 = full.substring(full.indexOf(',') + 1)
-    pendingPhotos.push({ base64, type: file.type, previewUrl: full })
-    renderPhotoPreview()
-  }
-  reader.readAsDataURL(file)
+// âââââââââââââââââââââââââââââââ
+// STARS
+// âââââââââââââââââââââââââââââââ
+function setStar(n) {
+  currentStarRating = n
+  renderStars(n)
+}
+
+function renderStars(n) {
+  const labels = ['', 'Malo', 'Regular', 'Bien', 'Muy bien', 'Excelente']
+  document.querySelectorAll('#stars-wrap .star').forEach((s, i) => {
+    s.textContent = i < n ? 'â' : 'â'
+    s.style.color = i < n ? '#f59e0b' : '#cbd5e1'
+  })
+  document.getElementById('star-label').textContent = n ? labels[n] : ''
+}
+
+// âââââââââââââââââââââââââââââââ
+// VARIANTS
+// âââââââââââââââââââââââââââââââ
+function addVariant() {
+  const id = Date.now()
+  captureVariants.push({ id, name: '', photos: [], precios: [] })
+  renderVariants()
+}
+
+function renderVariants() {
+  const container = document.getElementById('variants-list')
+  container.innerHTML = captureVariants.map((v, idx) => `
+    <div class="variant-card">
+      <div class="variant-header">
+        <span class="variant-title">Variante ${idx + 1}</span>
+        <button class="btn-del-variant" onclick="deleteVariant(${idx})">ðï¸</button>
+      </div>
+      <div class="frow">
+        <div class="fcol">
+          <span class="flabel">Nombre (color/tamaÃ±o)</span>
+          <input class="finput" placeholder="Ej: Azul, Talle L..." value="${v.name}" oninput="captureVariants[${idx}].name=this.value">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        ${v.photos.map((p, pi) => `<div class="form-photo-wrap"><img src="${p.previewUrl}" style="width:56px;height:56px"><button onclick="removeVariantPhoto(${idx},${pi})">â</button></div>`).join('')}
+        <div class="add-photo-btn" style="width:56px;height:56px;font-size:18px" onclick="triggerVariantPhoto(${idx})">+</div>
+      </div>
+    </div>`).join('')
+}
+
+function deleteVariant(idx) {
+  captureVariants.splice(idx, 1)
+  renderVariants()
+}
+
+function triggerVariantPhoto(idx) {
+  pendingVariantIdx = idx
+  document.getElementById('file-variant').click()
+}
+
+async function handleVariantPhoto(e) {
+  const file = e.target.files[0]
+  if (!file || pendingVariantIdx === null) return
   e.target.value = ''
+  const dataUrl = await readFile(file)
+  captureVariants[pendingVariantIdx].photos.push({ base64: dataUrl.split(',')[1], type: file.type, previewUrl: dataUrl })
+  pendingVariantIdx = null
+  renderVariants()
 }
 
-function renderPhotoPreview() {
-  const container = document.getElementById('img-preview')
-  if (!pendingPhotos.length) { container.style.display = 'none'; container.innerHTML = ''; return }
-  container.style.display = 'flex'
-  container.innerHTML = pendingPhotos.map((p, i) => `
-    <div class="photo-thumb-wrap">
-      <img src="${p.previewUrl}">
-      <button onclick="removePhoto(${i})">✕</button>
-    </div>
-  `).join('')
+function removeVariantPhoto(varIdx, photoIdx) {
+  captureVariants[varIdx].photos.splice(photoIdx, 1)
+  renderVariants()
 }
 
-function removePhoto(i) {
-  pendingPhotos.splice(i, 1)
-  renderPhotoPreview()
-}
-
-function clearPhotos() {
-  pendingPhotos = []
-  renderPhotoPreview()
-}
-
-// ═══════════════════════════════════════
-// SAVE PRODUCT → SUPABASE
-// ═══════════════════════════════════════
-function showSaveBanner() {
-  if (!pendingFicha) return
-  document.getElementById('save-product-name').textContent = pendingFicha.nombre || 'Producto evaluado'
-  const info = []
-  if (pendingFicha.calificacion) info.push(`Nota: ${pendingFicha.calificacion}/10`)
-  if (pendingFicha.precio_fob_usd) info.push(`FOB: $${pendingFicha.precio_fob_usd}`)
-  document.getElementById('save-product-info').textContent = info.join(' · ')
-  document.getElementById('save-banner').classList.add('show')
-}
-
-function openSettings() {
-  document.getElementById('settings-anthropic').value = ''
-  document.getElementById('settings-supabase').value = ''
-  document.getElementById('settings-panel').classList.add('show')
-}
-function closeSettings() {
-  document.getElementById('settings-panel').classList.remove('show')
-}
-function saveSettingsPanel() {
-  const ak = document.getElementById('settings-anthropic').value.trim()
-  const sk = document.getElementById('settings-supabase').value.trim()
-  if (ak) {
-    if (!ak.startsWith('sk-')) { alert('Anthropic key inválida — debe empezar con sk-ant-'); return }
-    apiKey = ak; localStorage.setItem('levi_anthropic_key', ak)
+// âââââââââââââââââââââââââââââââ
+// GET FORM STATE
+// âââââââââââââââââââââââââââââââ
+function getFormState() {
+  const precios = []
+  document.querySelectorAll('#price-rows tr').forEach(row => {
+    const qty = parseFloat(row.querySelector('.qty-input')?.value)
+    const price = parseFloat(row.querySelector('.price-input')?.value)
+    if (qty || price) precios.push({ cantidad: qty || null, precio: price || null })
+  })
+  return {
+    nombre: document.getElementById('f-nombre').value.trim(),
+    material: document.getElementById('f-material').value.trim(),
+    categoria: document.getElementById('f-categoria').value.trim(),
+    descripcion: document.getElementById('f-descripcion').value.trim(),
+    precio_moneda: currentCurrency,
+    precios,
+    embalaje_tipo: document.getElementById('f-embalaje-tipo').value,
+    uds_caja_interna: parseFloat(document.getElementById('f-uds-caja-interna').value) || null,
+    uds_carton: parseFloat(document.getElementById('f-uds-carton').value) || null,
+    largo_carton_cm: parseFloat(document.getElementById('f-largo-carton').value) || null,
+    ancho_carton_cm: parseFloat(document.getElementById('f-ancho-carton').value) || null,
+    alto_carton_cm: parseFloat(document.getElementById('f-alto-carton').value) || null,
+    cbm_carton: parseFloat(document.getElementById('f-cbm').value) || null,
+    peso_carton_kg: parseFloat(document.getElementById('f-peso-carton').value) || null,
+    largo_prod_cm: parseFloat(document.getElementById('f-largo-prod').value) || null,
+    ancho_prod_cm: parseFloat(document.getElementById('f-ancho-prod').value) || null,
+    alto_prod_cm: parseFloat(document.getElementById('f-alto-prod').value) || null,
+    peso_unidad_kg: parseFloat(document.getElementById('f-peso-unidad').value) || null,
+    colores: document.getElementById('f-colores').value.trim() || null,
+    calidad_estrellas: currentStarRating || null,
+    calidad_notas: document.getElementById('f-calidad-notas').value.trim() || null,
+    documentos_internacionales: document.getElementById('f-documentos').value.trim() || null,
+    notas: document.getElementById('f-notas').value.trim() || null,
+    proveedor_stand: currentSupplier || null,
+    variantes: captureVariants.length ? captureVariants.map(v => ({
+      nombre: v.name,
+      fotos_count: v.photos.length
+    })) : null
   }
-  if (sk) {
-    if (!sk.startsWith('sb_') && !sk.startsWith('eyJ')) { alert('Supabase key inválida'); return }
-    supabaseKey = sk; localStorage.setItem('levi_supabase_key', sk)
-    initSupabase(); ensureSession()
-  }
-  closeSettings()
-  showToast('✅ Keys actualizadas')
 }
 
-function dismissBanner() { document.getElementById('save-banner').classList.remove('show'); pendingFicha = null; allConversationImgUrls = [] }
+// âââââââââââââââââââââââââââââââ
+// SAVE
+// âââââââââââââââââââââââââââââââ
+async function saveCaptureForm() {
+  const btn = document.getElementById('btn-save-form')
+  btn.textContent = 'â³ Guardando...'
+  btn.disabled = true
 
-// Compress image to max size and JPEG quality — keeps photos small enough for DB storage
+  try {
+    const state = getFormState()
+
+    // Compress all photos
+    const fotosUrls = []
+    for (const p of capturePhotos) {
+      try { fotosUrls.push(await compressImage(p.previewUrl, 400, 0.55)) }
+      catch(e) { fotosUrls.push(p.previewUrl) }
+    }
+
+    // Compress variant photos
+    const variantesData = []
+    for (const v of captureVariants) {
+      const vFotos = []
+      for (const p of v.photos) {
+        try { vFotos.push(await compressImage(p.previewUrl, 400, 0.55)) }
+        catch(e) { vFotos.push(p.previewUrl) }
+      }
+      variantesData.push({ nombre: v.name, fotos_urls: vFotos })
+    }
+
+    const productData = {
+      session_id: sessionId,
+      nombre: state.nombre || 'a averiguar',
+      descripcion: state.descripcion || null,
+      categoria: state.categoria || null,
+      material_principal: state.material || null,
+      proveedor_stand: state.proveedor_stand,
+      precio_moneda: state.precio_moneda,
+      precios_por_cantidad: state.precios.length ? state.precios : null,
+      precio_fob_usd: state.precio_moneda === 'usd' && state.precios[0]?.precio ? state.precios[0].precio : null,
+      embalaje_tipo: state.embalaje_tipo || null,
+      unidades_caja_interna: state.uds_caja_interna,
+      unidades_por_caja: state.uds_carton,
+      largo_carton_cm: state.largo_carton_cm,
+      ancho_carton_cm: state.ancho_carton_cm,
+      alto_carton_cm: state.alto_carton_cm,
+      cbm_caja_master: state.cbm_carton,
+      peso_carton_kg: state.peso_carton_kg,
+      largo_cm: state.largo_prod_cm,
+      ancho_cm: state.ancho_prod_cm,
+      alto_cm: state.alto_prod_cm,
+      peso_kg: state.peso_unidad_kg,
+      colores_variantes: state.colores,
+      calidad_estrellas: state.calidad_estrellas,
+      notas_calidad: state.calidad_notas,
+      documentos_internacionales: state.documentos_internacionales,
+      notas_adicionales: state.notas,
+      variantes: variantesData.length ? variantesData : null,
+      foto_url: fotosUrls[0] || null,
+      fotos_urls: fotosUrls,
+      status: 'completo'
+    }
+
+    const { data, error } = await sbClient.from('productos').insert(productData).select().single()
+    if (error) throw new Error(error.message)
+
+    if (fotosUrls.length) {
+      try { localStorage.setItem(`levi_ph_${data.id}`, JSON.stringify(fotosUrls)) } catch(e) {}
+    }
+    data._localPhotos = fotosUrls
+    products.unshift(data)
+
+    showToast(`â "${state.nombre || 'Producto'}" guardado`)
+    cancelCapture()
+  } catch(e) {
+    alert('â Error guardando: ' + e.message)
+    btn.textContent = 'ð¾ Guardar producto'
+    btn.disabled = false
+  }
+}
+
+function cancelCapture() {
+  capturePhotos = []
+  captureVariants = []
+  currentStarRating = 0
+  showCaptureState('empty')
+  document.getElementById('btn-save-form').textContent = 'ð¾ Guardar producto'
+  document.getElementById('btn-save-form').disabled = false
+}
+
+function startNewCapture() {
+  showScreen('capture')
+  cancelCapture()
+}
+
+// âââââââââââââââââââââââââââââââ
+// IMAGE COMPRESSION
+// âââââââââââââââââââââââââââââââ
 function compressImage(dataUrl, maxPx, quality) {
   return new Promise((resolve) => {
     const img = new Image()
@@ -574,157 +1157,34 @@ function compressImage(dataUrl, maxPx, quality) {
       canvas.getContext('2d').drawImage(img, 0, 0, w, h)
       resolve(canvas.toDataURL('image/jpeg', quality))
     }
-    img.onerror = () => resolve(dataUrl) // fallback to original
+    img.onerror = () => resolve(dataUrl)
     img.src = dataUrl
   })
 }
 
-async function saveProduct() {
-  if (!pendingFicha) return
-  document.getElementById('btn-save').textContent = '⏳ Guardando...'
-  document.getElementById('btn-save').disabled = true
-
-  // DEBUG: mostrar cuántas fotos encontramos antes de guardar
-  const rawImgs = (pendingFicha._imgUrls || []).filter(u => u && u.startsWith('data:'))
-  showToast(`📷 ${rawImgs.length} foto(s) detectadas`)
-
-  try {
-    // Comprimir fotos: 400px max, 0.55 quality → ~8-20KB por foto
-    const fotosUrls = []
-    for (const url of rawImgs) {
-      try {
-        const compressed = await compressImage(url, 400, 0.55)
-        fotosUrls.push(compressed)
-      } catch(e) {
-        fotosUrls.push(url) // fallback al original si falla la compresión
-      }
-    }
-
-    // Normalizar rol — guardar cualquier valor, solo normalizar formato
-    const rolRaw = (pendingFicha.rol || '').toLowerCase().trim()
-      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
-      .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u')
-    const rolNorm = rolRaw || null
-
-    const costos = calcularCostos(pendingFicha)
-    const productData = {
-      session_id: sessionId,
-      nombre: pendingFicha.nombre || 'a averiguar',
-      descripcion: pendingFicha.descripcion || null,
-      categoria: pendingFicha.categoria || null,
-      rol: rolNorm,
-      fit_doctrina: pendingFicha.fit_doctrina || null,
-      proveedor_nombre: pendingFicha.proveedor_nombre || null,
-      proveedor_stand: pendingFicha.proveedor_stand || null,
-      proveedor_contacto: pendingFicha.proveedor_contacto || null,
-      precio_fob_usd: pendingFicha.precio_fob_usd || null,
-      moq_base: pendingFicha.moq_base || null,
-      packaging_opciones: pendingFicha.packaging_opciones || [],
-      lead_time_dias: pendingFicha.lead_time_dias || null,
-      largo_cm: pendingFicha.largo_cm || null,
-      ancho_cm: pendingFicha.ancho_cm || null,
-      alto_cm: pendingFicha.alto_cm || null,
-      peso_kg: pendingFicha.peso_kg || null,
-      cbm_unidad: pendingFicha.cbm_unidad || null,
-      cbm_caja_master: pendingFicha.cbm_caja_master || null,
-      unidades_por_caja: pendingFicha.unidades_por_caja || null,
-      material_principal: pendingFicha.material_principal || null,
-      criterios_evaluados: pendingFicha.criterios_evaluados || [],
-      notas_calidad: pendingFicha.notas_calidad || null,
-      muestra_disponible: pendingFicha.muestra_disponible || null,
-      costo_muestra_usd: pendingFicha.costo_muestra_usd || null,
-      normativa_israel: pendingFicha.normativa_israel || [],
-      certificados_requeridos: pendingFicha.certificados_requeridos || [],
-      certificados_disponibles: pendingFicha.certificados_disponibles || [],
-      certificados_faltantes: pendingFicha.certificados_faltantes || [],
-      notas_legales: pendingFicha.notas_legales || null,
-      arancel_tasa: pendingFicha.arancel_tasa || null,
-      calificacion: pendingFicha.calificacion || null,
-      justificacion: pendingFicha.justificacion || null,
-      fortalezas: pendingFicha.fortalezas || [],
-      debilidades: pendingFicha.debilidades || [],
-      duplicados_vinculados: pendingFicha.duplicados_vinculados || [],
-      notas_adicionales: pendingFicha.notas_adicionales || null,
-      comentarios: pendingFicha.comentarios || null,
-      opinion_usuario: pendingFicha.opinion_usuario || null,
-      foto_url: fotosUrls[0] || null,
-      fotos_urls: fotosUrls,
-      status: 'completo',
-      ...costos
-    }
-
-    const { data, error } = await sbClient.from('productos').insert(productData).select().single()
-    if (error) throw new Error(error.message)
-
-    // Save conversation
-    await sbClient.from('conversaciones').insert({ producto_id: data.id, session_id: sessionId, messages: messages })
-
-    // Guardar fotos en localStorage (100% confiable, no depende de Supabase)
-    if (fotosUrls.length > 0) {
-      try { localStorage.setItem(`levi_ph_${data.id}`, JSON.stringify(fotosUrls)) } catch(e) {}
-    }
-
-    // Inyectar fotos en el objeto local (para mostrar inmediatamente sin recargar)
-    data._localPhotos = fotosUrls
-
-    products.push(data)
-    dismissBanner()
-    addBotMessage(`✅ "${data.nombre || 'Producto'}" guardado${fotosUrls.length > 0 ? ` con ${fotosUrls.length} foto(s)` : ' (sin fotos)'}. ¿Siguiente?`)
-    showToast('✅ Guardado en la nube')
-  } catch(e) {
-    alert('❌ Error guardando: ' + e.message)
-    addBotMessage('❌ Error guardando: ' + e.message)
-  } finally {
-    document.getElementById('btn-save').textContent = '💾 Guardar'
-    document.getElementById('btn-save').disabled = false
-  }
-}
-
-function calcularCostos(f) {
-  const fob = f.precio_fob_usd; if (!fob) return {}
-  const broker = fob * BROKER_PCT
-  const seguro = fob * SEGURO_PCT
-  const flete_a = COST_CONFIG.flete_por_cbm && f.cbm_unidad ? COST_CONFIG.flete_por_cbm * f.cbm_unidad : null
-  const base_arancel = fob + broker + seguro + (flete_a || 0)
-  const arancel = f.arancel_tasa != null ? base_arancel * f.arancel_tasa : null
-  const costo = flete_a != null && arancel != null
-    ? fob + broker + seguro + flete_a + arancel + (COST_CONFIG.honorarios || 0) : null
-  return {
-    seguro_usd: seguro,
-    flete_metodo_a_usd: flete_a,
-    arancel_tasa: f.arancel_tasa,
-    arancel_usd: arancel,
-    honorarios_usd: COST_CONFIG.honorarios,
-    costo_aterrizado_usd: costo,
-    precio_mayorista_min_usd: costo && COST_CONFIG.markup_mayorista ? costo * COST_CONFIG.markup_mayorista : null,
-    precio_consumidor_sugerido_usd: (costo && COST_CONFIG.markup_mayorista && COST_CONFIG.markup_consumidor) ? costo * COST_CONFIG.markup_mayorista * COST_CONFIG.markup_consumidor : null
-  }
-}
-
-// Obtener fotos de un producto: primero localStorage, luego DB
+// âââââââââââââââââââââââââââââââ
+// GET PHOTOS
+// âââââââââââââââââââââââââââââââ
 function getPhotos(p) {
-  // Fotos inyectadas en memoria (recién guardadas)
   if (p._localPhotos?.length) return p._localPhotos
-  // Fotos en localStorage
   try {
     const local = localStorage.getItem(`levi_ph_${p.id}`)
     if (local) { const arr = JSON.parse(local); if (arr?.length) return arr }
   } catch(e) {}
-  // Fotos en Supabase DB
-  const dbPhotos = (p.fotos_urls || []).filter(Boolean)
-  if (dbPhotos.length) return dbPhotos
+  const db = (p.fotos_urls || []).filter(Boolean)
+  if (db.length) return db
   if (p.foto_url) return [p.foto_url]
   return []
 }
 
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 // DASHBOARD
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
 async function loadAndRenderDashboard() {
   document.getElementById('products-list').innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8">Cargando...</div>'
   try {
     const { data, error } = await sbClient.from('productos').select('*').order('created_at', { ascending: false })
-    if (error) throw new Error(error.message)
+    if (error) throw error
     products = data || []
     renderDashboard()
     setSyncStatus(true)
@@ -736,77 +1196,69 @@ async function loadAndRenderDashboard() {
 
 function renderDashboard() {
   const valid = products.filter(p => p.status !== 'descartado')
-  const cbmTotal = valid.reduce((s,p) => s + (p.cbm_caja_master||0), 0)
+  const cbmTotal = valid.reduce((s, p) => s + (p.cbm_caja_master || 0), 0)
   const pct = Math.round((cbmTotal / CBM_CONTAINER) * 100)
-
   document.getElementById('stat-total').textContent = products.length
   document.getElementById('stat-candidatos').textContent = products.filter(p => p.status === 'candidato').length
   document.getElementById('stat-cbm').textContent = cbmTotal.toFixed(1)
   document.getElementById('dash-count').textContent = `(${products.length})`
-
   const fill = document.getElementById('cbm-bar-fill')
-  fill.style.width = Math.min(pct,100) + '%'
+  fill.style.width = Math.min(pct, 100) + '%'
   fill.style.background = pct > 90 ? '#ef4444' : pct > 70 ? '#f59e0b' : '#22c55e'
-  document.getElementById('cbm-label').textContent = `${cbmTotal.toFixed(1)} / ${CBM_CONTAINER} CBM — ${(CBM_CONTAINER-cbmTotal).toFixed(1)} disponibles`
+  document.getElementById('cbm-label').textContent = `${cbmTotal.toFixed(2)} / ${CBM_CONTAINER} CBM â ${(CBM_CONTAINER - cbmTotal).toFixed(2)} disponibles`
 
   const filtered = products.filter(p => {
     if (currentFilter === 'todos') return true
     if (currentFilter === 'candidato') return p.status === 'candidato'
     if (currentFilter === 'descartado') return p.status === 'descartado'
-    return p.rol === currentFilter
+    return false
   })
 
   const list = document.getElementById('products-list')
-  if (!filtered.length) { list.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8">No hay productos aquí</div>'; return }
+  if (!filtered.length) { list.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8">Sin productos</div>'; return }
   list.innerHTML = filtered.map(p => productCardHTML(p)).join('')
 }
 
 function productCardHTML(p) {
-  const allPhotos = getPhotos(p)
-  const primaryPhoto = allPhotos[0] || null
-  const thumb = primaryPhoto
-    ? `<div class="product-thumb"><img src="${primaryPhoto}" alt=""></div>`
-    : `<div class="product-thumb">📦</div>`
-
-  const stdRoles = ['clasico','stepup','complemento']
-  const rolLabel = {clasico:'Clásico',stepup:'Step-up',complemento:'Complemento'}
-  const rolTagClass = stdRoles.includes(p.rol) ? `tag-${p.rol}` : 'tag-otro'
-  const rolTag = p.rol ? `<span class="tag ${rolTagClass}">${rolLabel[p.rol]||p.rol}</span>` : ''
+  const photos = getPhotos(p)
+  const thumb = photos[0]
+    ? `<div class="product-thumb"><img src="${photos[0]}" alt=""></div>`
+    : `<div class="product-thumb">ð¦</div>`
   const statusTag = `<span class="tag tag-${p.status}">${p.status}</span>`
-  const usd = n => n!=null ? '$'+Number(n).toFixed(2) : '—'
-  const broker = p.precio_fob_usd ? p.precio_fob_usd * BROKER_PCT : null
-  const costoAprox = p.costo_aterrizado_usd || (p.precio_fob_usd && broker ? '~$'+(p.precio_fob_usd + broker).toFixed(2) : '—')
-  const photoCount = allPhotos.length
-  const photoIndicator = photoCount > 0 ? `<span style="font-size:10px;color:#94a3b8;margin-left:4px">📷${photoCount}</span>` : ''
-
+  const stars = p.calidad_estrellas ? 'â'.repeat(p.calidad_estrellas) + 'â'.repeat(5 - p.calidad_estrellas) : ''
+  const priceInfo = p.precios_por_cantidad?.length
+    ? p.precios_por_cantidad[0]?.precio + ' ' + (p.precio_moneda === 'yuan' ? 'Â¥' : '$')
+    : (p.precio_fob_usd ? '$' + p.precio_fob_usd : 'â')
+  const nisInfo = p.precios_por_cantidad?.[0]?.precio
+    ? 'âª' + Math.round(p.precios_por_cantidad[0].precio * (p.precio_moneda === 'yuan' ? YUAN_TO_NIS : USD_TO_NIS))
+    : 'â'
+  const photoIndicator = photos.length > 0 ? `<span style="font-size:10px;color:#94a3b8;margin-left:4px">ð·${photos.length}</span>` : ''
   return `<div class="product-card">
     <div class="product-card-body">
       ${thumb}
       <div class="product-info">
         <div style="display:flex;align-items:start;justify-content:space-between">
-          <div class="product-name">${p.nombre||'Sin nombre'}${photoIndicator}</div>
-          ${p.calificacion ? `<div style="color:var(--amber);font-size:13px;font-weight:700;white-space:nowrap">⭐${p.calificacion}</div>` : ''}
+          <div class="product-name">${p.nombre || 'Sin nombre'}${photoIndicator}</div>
+          ${stars ? `<div style="color:#f59e0b;font-size:11px;white-space:nowrap">${stars}</div>` : ''}
         </div>
-        <div class="product-tags">${rolTag}${statusTag}</div>
+        <div class="product-tags">${statusTag}${p.proveedor_stand ? `<span class="tag" style="background:#f1f5f9;color:#64748b">Stand ${p.proveedor_stand}</span>` : ''}</div>
         <div class="product-nums">
-          <div class="num-cell"><strong>${usd(p.precio_fob_usd)}</strong>FOB</div>
-          <div class="num-cell"><strong>${typeof costoAprox === 'string' ? costoAprox : usd(costoAprox)}</strong>Israel</div>
-          <div class="num-cell"><strong>${p.moq_base||'—'}</strong>MOQ</div>
+          <div class="num-cell"><strong>${priceInfo}</strong>Precio</div>
+          <div class="num-cell"><strong>${nisInfo}</strong>Consumidor</div>
+          <div class="num-cell"><strong>${p.cbm_caja_master || 'â'}</strong>CBM</div>
         </div>
-        ${p.proveedor_stand ? `<div style="font-size:11px;color:#94a3b8;margin-top:4px">Stand: ${p.proveedor_stand}</div>` : ''}
-        ${p.opinion_usuario ? `<div style="font-size:11px;color:var(--green);margin-top:3px">💬 Mi opinión: ${p.opinion_usuario.slice(0,50)}${p.opinion_usuario.length>50?'…':''}</div>` : ''}
       </div>
     </div>
     <div class="product-actions">
       ${p.status === 'candidato'
-        ? `<button class="action-btn" style="color:#92400e" onclick="setStatus('${p.id}','completo');event.stopPropagation()">↩ Quitar ⭐</button>`
-        : `<button class="action-btn green" onclick="setStatus('${p.id}','candidato');event.stopPropagation()">⭐ Candidato</button>`}
-      <button class="action-btn" onclick="openModal('${p.id}');event.stopPropagation()">Ver más</button>
-      <button class="action-btn blue" onclick="editProduct('${p.id}');event.stopPropagation()">✏️</button>
+        ? `<button class="action-btn" style="color:#92400e" onclick="setStatus('${p.id}','completo');event.stopPropagation()">â© Quitar â­</button>`
+        : `<button class="action-btn green" onclick="setStatus('${p.id}','candidato');event.stopPropagation()">â­ Candidato</button>`}
+      <button class="action-btn" onclick="openModal('${p.id}');event.stopPropagation()">Ver mÃ¡s</button>
+      <button class="action-btn blue" onclick="editProduct('${p.id}');event.stopPropagation()">âï¸</button>
       ${p.status === 'descartado'
-        ? `<button class="action-btn" style="color:#16a34a" onclick="setStatus('${p.id}','completo');event.stopPropagation()">↩ Recuperar</button>`
-        : `<button class="action-btn red" onclick="setStatus('${p.id}','descartado');event.stopPropagation()">✕</button>`}
-      <button class="action-btn" style="color:#dc2626;font-size:12px" onclick="deleteProduct('${p.id}');event.stopPropagation()">🗑️</button>
+        ? `<button class="action-btn" style="color:#16a34a" onclick="setStatus('${p.id}','completo');event.stopPropagation()">â© Recuperar</button>`
+        : `<button class="action-btn red" onclick="setStatus('${p.id}','descartado');event.stopPropagation()">â</button>`}
+      <button class="action-btn" style="color:#dc2626" onclick="deleteProduct('${p.id}');event.stopPropagation()">ðï¸</button>
     </div>
   </div>`
 }
@@ -819,13 +1271,12 @@ async function setStatus(id, status) {
 
 async function deleteProduct(id) {
   const p = products.find(x => x.id === id)
-  const name = p?.nombre || 'este producto'
-  if (!confirm(`¿Borrar "${name}" definitivamente? No se puede deshacer.`)) return
+  if (!confirm(`Â¿Borrar "${p?.nombre || 'este producto'}"?`)) return
   const { error } = await sbClient.from('productos').delete().eq('id', id)
-  if (error) { showToast('❌ Error al borrar'); return }
+  if (error) { showToast('â Error al borrar'); return }
   products = products.filter(x => x.id !== id)
   renderDashboard()
-  showToast('🗑️ Producto borrado')
+  showToast('ðï¸ Borrado')
 }
 
 function setFilter(f, btn) {
@@ -835,152 +1286,91 @@ function setFilter(f, btn) {
   renderDashboard()
 }
 
-// ═══════════════════════════════════════
-// MODAL DETALLE
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
+// MODAL
+// âââââââââââââââââââââââââââââââ
 function openModal(id) {
   const p = products.find(x => x.id === id); if (!p) return
-  const usd = n => n!=null ? '$'+Number(n).toFixed(2) : '— (pendiente)'
-  const broker = p.precio_fob_usd ? p.precio_fob_usd * BROKER_PCT : null
+  const photos = getPhotos(p)
+  let html = `<button onclick="closeModal()" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;z-index:1">â</button>`
+  if (photos.length) html += `<div class="photo-gallery">${photos.map(u => `<img src="${u}">`).join('')}</div>`
+  html += `<div style="font-size:18px;font-weight:700;color:var(--blue-dark);margin-bottom:4px">${p.nombre || 'Sin nombre'}</div>`
+  if (p.descripcion) html += `<div style="font-size:13px;color:#64748b;margin-bottom:10px">${p.descripcion}</div>`
 
-  // Photos: localStorage primero, luego DB
-  const allPhotos = getPhotos(p)
+  if (p.proveedor_stand) html += `<div style="font-size:12px;color:#94a3b8;margin-bottom:8px">Stand: ${p.proveedor_stand}</div>`
+  if (p.calidad_estrellas) html += `<div style="color:#f59e0b;margin-bottom:8px">${'â'.repeat(p.calidad_estrellas)}${'â'.repeat(5-p.calidad_estrellas)}</div>`
 
-  let html = `<button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:#f1f5f9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;z-index:1">✕</button>`
-
-  if (allPhotos.length > 0) {
-    html += `<div class="photo-gallery">${allPhotos.map(url => `<img src="${url}" alt="">`).join('')}</div>`
-  }
-
-  html += `<div style="font-size:20px;font-weight:700;color:var(--blue-dark);margin-bottom:4px">${p.nombre||'Sin nombre'}</div>`
-  if (p.descripcion) html += `<div style="font-size:13px;color:#64748b;margin-bottom:12px">${p.descripcion}</div>`
-
-  // Opinión del usuario
-  html += `<div class="section-title">💬 Mi opinión</div>`
-  html += `<div class="opinion-box">
-    <div class="opinion-box-label">Tu opinión personal</div>
-    <div id="opinion-display-${id}">`
-  html += p.opinion_usuario
-    ? `<div class="opinion-box-text">${esc(p.opinion_usuario)}</div>`
-    : `<div class="opinion-placeholder">Sin opinión aún</div>`
-  html += `</div>
-    <textarea id="opinion-input-${id}" class="edit-textarea" style="margin-top:8px;min-height:50px" placeholder="Escribí tu opinión...">${p.opinion_usuario||''}</textarea>
-    <button onclick="saveOpinion('${id}')" style="margin-top:6px;padding:7px 16px;background:var(--green);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer">Guardar opinión</button>
-  </div>`
-
-  // Costos
-  html += `<div class="section-title">💰 Costos</div>`
-  html += row('FOB China', usd(p.precio_fob_usd))
-  html += row('Broker 7%', usd(broker))
-  html += row('Seguro 0.3%', usd(p.seguro_usd))
-  html += row('Flete (por CBM)', usd(p.flete_metodo_a_usd))
-  html += row('Arancel Israel', p.arancel_tasa ? `${(p.arancel_tasa*100).toFixed(0)}% = ${usd(p.arancel_usd)}` : '— pendiente')
-  html += `<div class="detail-row total"><span>Costo aterrizado</span><span>${usd(p.costo_aterrizado_usd)}</span></div>`
-  html += row('Precio mayorista mín.', usd(p.precio_mayorista_min_usd))
-  html += row('Precio consumidor', usd(p.precio_consumidor_sugerido_usd))
-
-  // Packaging
-  if (p.packaging_opciones?.length) {
-    html += `<div class="section-title">📦 Packaging</div>`
-    p.packaging_opciones.forEach(op => {
-      if (typeof op === 'string') html += row(op, '')
-      else html += row(op.tipo||op.nombre||JSON.stringify(op), op.precio_adicional_usd ? `+$${op.precio_adicional_usd} | MOQ ${op.moq}` : '')
+  if (p.precios_por_cantidad?.length) {
+    html += `<div class="section-title">ð° Precios (${p.precio_moneda || 'yuan'})</div>`
+    p.precios_por_cantidad.forEach(pr => {
+      const nis = pr.precio ? Math.round(pr.precio * (p.precio_moneda === 'yuan' ? YUAN_TO_NIS : USD_TO_NIS)) : 'â'
+      html += `<div class="detail-row"><span>${pr.cantidad ? pr.cantidad + ' uds' : 'â'}</span><span>${pr.precio || 'â'} â âª${nis}</span></div>`
     })
   }
 
-  // Legal
-  if (p.certificados_faltantes?.length || p.certificados_disponibles?.length) {
-    html += `<div class="section-title">⚖️ Legal Israel</div>`
-    ;(p.certificados_disponibles||[]).forEach(c => html += `<div style="color:var(--green);font-size:13px;margin-bottom:2px">✓ ${c}</div>`)
-    ;(p.certificados_faltantes||[]).forEach(c => html += `<div style="color:var(--red);font-size:13px;margin-bottom:2px">✗ ${c} (falta)</div>`)
+  if (p.embalaje_tipo || p.unidades_por_caja || p.cbm_caja_master) {
+    html += `<div class="section-title">ð¦ LogÃ­stica</div>`
+    if (p.embalaje_tipo) html += row('Embalaje', p.embalaje_tipo)
+    if (p.unidades_caja_interna) html += row('Uds/caja interna', p.unidades_caja_interna)
+    if (p.unidades_por_caja) html += row('Uds/carton', p.unidades_por_caja)
+    if (p.cbm_caja_master) html += row('CBM carton', p.cbm_caja_master)
+    if (p.peso_carton_kg) html += row('Peso carton', p.peso_carton_kg + ' kg')
   }
 
-  // Evaluación LEVI
-  if (p.justificacion) {
-    html += `<div class="section-title">📊 Evaluación LEVI — ${p.calificacion||'?'}/10</div>`
-    html += `<div style="font-size:13px;color:#334155;line-height:1.5">${p.justificacion}</div>`
-    if (p.fortalezas?.length) html += '<div style="margin-top:8px">' + p.fortalezas.map(f => `<div style="font-size:12px;color:var(--green)">✓ ${f}</div>`).join('') + '</div>'
-    if (p.debilidades?.length) html += p.debilidades.map(d => `<div style="font-size:12px;color:var(--red)">✗ ${d}</div>`).join('')
+  if (p.documentos_internacionales) {
+    html += `<div class="section-title">ð Documentos</div>`
+    html += `<div style="font-size:13px;color:#334155">${esc(p.documentos_internacionales)}</div>`
   }
 
-  // Calidad
-  if (p.notas_calidad) { html += `<div class="section-title">🔬 Calidad</div><div style="font-size:13px;color:#334155">${p.notas_calidad}</div>` }
+  if (p.notas_calidad) {
+    html += `<div class="section-title">â­ Calidad</div>`
+    html += `<div style="font-size:13px;color:#334155">${esc(p.notas_calidad)}</div>`
+  }
 
-  // Comentarios adicionales
-  if (p.comentarios) { html += `<div class="section-title">📝 Comentarios</div><div style="font-size:13px;color:#334155">${p.comentarios}</div>` }
+  if (p.notas_adicionales) {
+    html += `<div class="section-title">ð Notas</div>`
+    html += `<div style="font-size:13px;color:#334155">${esc(p.notas_adicionales)}</div>`
+  }
 
-  html += `<div style="height:24px"></div>`
+  if (p.variantes?.length) {
+    html += `<div class="section-title">ð¨ Variantes</div>`
+    p.variantes.forEach(v => html += `<div style="font-size:13px;color:#334155;margin-bottom:2px">â¢ ${v.nombre || 'â'}</div>`)
+  }
 
+  html += `<div style="height:20px"></div>`
   document.getElementById('modal-content').innerHTML = html
   document.getElementById('modal').classList.add('show')
-}
-
-async function saveOpinion(id) {
-  const val = document.getElementById(`opinion-input-${id}`).value.trim()
-  const { error } = await sbClient.from('productos').update({ opinion_usuario: val }).eq('id', id)
-  if (error) { showToast('❌ Error guardando'); return }
-  const p = products.find(x => x.id === id); if (p) p.opinion_usuario = val
-  const display = document.getElementById(`opinion-display-${id}`)
-  if (display) display.innerHTML = val
-    ? `<div class="opinion-box-text">${esc(val)}</div>`
-    : `<div class="opinion-placeholder">Sin opinión aún</div>`
-  showToast('✅ Opinión guardada')
-  renderDashboard()
 }
 
 function row(label, value) { return `<div class="detail-row"><span>${label}</span><span>${value}</span></div>` }
 function closeModal() { document.getElementById('modal').classList.remove('show') }
 
-// ═══════════════════════════════════════
-// EDIT PRODUCT
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
+// EDIT
+// âââââââââââââââââââââââââââââââ
 function editProduct(id) {
   const p = products.find(x => x.id === id); if (!p) return
-  const v = x => x != null ? String(x) : ''
   const html = `
-    <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:#f1f5f9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer">✕</button>
-    <div style="font-size:18px;font-weight:700;color:var(--blue-dark);margin-bottom:16px">✏️ Editar producto</div>
+    <button onclick="closeModal()" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer">â</button>
+    <div style="font-size:17px;font-weight:700;color:var(--blue-dark);margin-bottom:14px">âï¸ Editar</div>
     <form onsubmit="saveEdit(event,'${id}')">
       <label class="edit-label">Nombre</label>
       <input class="edit-input" name="nombre" value="${esc2(p.nombre||'')}">
-
-      <label class="edit-label">Categoría</label>
+      <label class="edit-label">Material</label>
+      <input class="edit-input" name="material_principal" value="${esc2(p.material_principal||'')}">
+      <label class="edit-label">CategorÃ­a</label>
       <input class="edit-input" name="categoria" value="${esc2(p.categoria||'')}">
-
-      <label class="edit-label">Rol (clasico / stepup / complemento / otro)</label>
-      <input class="edit-input" name="rol" value="${esc2(p.rol||'')}">
-
-      <label class="edit-label">FOB USD</label>
-      <input class="edit-input" type="number" step="0.01" name="precio_fob_usd" value="${v(p.precio_fob_usd)}">
-
-      <label class="edit-label">MOQ base</label>
-      <input class="edit-input" type="number" name="moq_base" value="${v(p.moq_base)}">
-
-      <label class="edit-label">Nota LEVI (1-10)</label>
-      <input class="edit-input" type="number" min="1" max="10" name="calificacion" value="${v(p.calificacion)}">
-
       <label class="edit-label">Stand proveedor</label>
       <input class="edit-input" name="proveedor_stand" value="${esc2(p.proveedor_stand||'')}">
-
-      <label class="edit-label">Contacto proveedor</label>
-      <input class="edit-input" name="proveedor_contacto" value="${esc2(p.proveedor_contacto||'')}">
-
-      <label class="edit-label">Lead time (días)</label>
-      <input class="edit-input" type="number" name="lead_time_dias" value="${v(p.lead_time_dias)}">
-
       <label class="edit-label">Notas de calidad</label>
       <textarea class="edit-textarea" name="notas_calidad">${p.notas_calidad||''}</textarea>
-
-      <label class="edit-label">Comentarios adicionales</label>
-      <textarea class="edit-textarea" name="comentarios">${p.comentarios||''}</textarea>
-
-      <label class="edit-label">Mi opinión personal</label>
-      <textarea class="edit-textarea" name="opinion_usuario">${p.opinion_usuario||''}</textarea>
-
-      <button type="submit" class="btn-edit-save">💾 Guardar cambios</button>
+      <label class="edit-label">Documentos internacionales</label>
+      <textarea class="edit-textarea" name="documentos_internacionales">${p.documentos_internacionales||''}</textarea>
+      <label class="edit-label">Notas adicionales</label>
+      <textarea class="edit-textarea" name="notas_adicionales">${p.notas_adicionales||''}</textarea>
+      <button type="submit" class="btn-edit-save">ð¾ Guardar</button>
       <button type="button" class="btn-edit-cancel" onclick="closeModal()">Cancelar</button>
-    </form>
-  `
+    </form>`
   document.getElementById('modal-content').innerHTML = html
   document.getElementById('modal').classList.add('show')
 }
@@ -988,50 +1378,30 @@ function editProduct(id) {
 async function saveEdit(e, id) {
   e.preventDefault()
   const form = e.target
-  const f = form
   const updates = {
-    nombre: f.nombre.value || null,
-    categoria: f.categoria.value || null,
-    rol: f.rol.value.toLowerCase().trim() || null,
-    precio_fob_usd: parseFloat(f.precio_fob_usd.value) || null,
-    moq_base: parseInt(f.moq_base.value) || null,
-    calificacion: parseInt(f.calificacion.value) || null,
-    proveedor_stand: f.proveedor_stand.value || null,
-    proveedor_contacto: f.proveedor_contacto.value || null,
-    lead_time_dias: parseInt(f.lead_time_dias.value) || null,
-    notas_calidad: f.notas_calidad.value || null,
-    comentarios: f.comentarios.value || null,
-    opinion_usuario: f.opinion_usuario.value || null,
+    nombre: form.nombre.value || null,
+    material_principal: form.material_principal.value || null,
+    categoria: form.categoria.value || null,
+    proveedor_stand: form.proveedor_stand.value || null,
+    notas_calidad: form.notas_calidad.value || null,
+    documentos_internacionales: form.documentos_internacionales.value || null,
+    notas_adicionales: form.notas_adicionales.value || null
   }
-  const submitBtn = form.querySelector('button[type=submit]')
-  submitBtn.textContent = '⏳ Guardando...'
-  submitBtn.disabled = true
+  const btn = form.querySelector('button[type=submit]')
+  btn.textContent = 'â³...'; btn.disabled = true
   const { error } = await sbClient.from('productos').update(updates).eq('id', id)
-  if (error) { alert('Error: ' + error.message); submitBtn.textContent = '💾 Guardar cambios'; submitBtn.disabled = false; return }
+  if (error) { alert('Error: ' + error.message); btn.textContent = 'ð¾ Guardar'; btn.disabled = false; return }
   const idx = products.findIndex(x => x.id === id)
   if (idx >= 0) products[idx] = { ...products[idx], ...updates }
-  closeModal()
-  renderDashboard()
-  showToast('✅ Producto actualizado')
+  closeModal(); renderDashboard(); showToast('â Actualizado')
 }
 
-function esc2(s) { return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
-
-// ═══════════════════════════════════════
-// NEW PRODUCT
-// ═══════════════════════════════════════
-function newProduct() {
-  showScreen('chat'); messages = []; pendingFicha = null; allConversationImgUrls = []; dismissBanner()
-  document.getElementById('messages').innerHTML = ''
-  addBotMessage('¡Listo! Mandame la foto del siguiente producto.')
-}
-
-// ═══════════════════════════════════════
-// EXPORT EXCEL (CSV)
-// ═══════════════════════════════════════
+// âââââââââââââââââââââââââââââââ
+// EXPORT
+// âââââââââââââââââââââââââââââââ
 function exportExcel() {
-  if (!products.length) { alert('No hay productos para exportar.'); return }
-  const cols = ['nombre','categoria','rol','proveedor_nombre','proveedor_stand','proveedor_contacto','precio_fob_usd','moq_base','cbm_caja_master','unidades_por_caja','material_principal','calificacion','status','costo_aterrizado_usd','precio_mayorista_min_usd','precio_consumidor_sugerido_usd','arancel_tasa','notas_calidad','comentarios','opinion_usuario','justificacion','notas_legales','notas_adicionales','foto_url']
+  if (!products.length) { alert('Sin productos'); return }
+  const cols = ['nombre','categoria','material_principal','proveedor_stand','precio_moneda','precio_fob_usd','embalaje_tipo','unidades_por_caja','cbm_caja_master','peso_carton_kg','colores_variantes','calidad_estrellas','notas_calidad','documentos_internacionales','notas_adicionales','status','created_at']
   const header = cols.join(',')
   const rows = products.map(p => cols.map(c => {
     const v = p[c]
@@ -1039,7 +1409,7 @@ function exportExcel() {
     if (typeof v === 'object') return `"${JSON.stringify(v).replace(/"/g,'""')}"`
     return `"${String(v).replace(/"/g,'""')}"`
   }).join(','))
-  const csv = '﻿' + header + '\n' + rows.join('\n')
+  const csv = 'ï»¿' + header + '\n' + rows.join('\n')
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a'); a.href = url
@@ -1047,65 +1417,33 @@ function exportExcel() {
   a.click()
 }
 
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-function setSyncStatus(online) {
-  document.getElementById('sync-dot').classList.toggle('offline', !online)
+// âââââââââââââââââââââââââââââââ
+// SETTINGS
+// âââââââââââââââââââââââââââââââ
+function openSettings() {
+  document.getElementById('settings-anthropic').value = ''
+  document.getElementById('settings-supabase').value = ''
+  document.getElementById('settings-panel').classList.add('show')
 }
+function closeSettings() { document.getElementById('settings-panel').classList.remove('show') }
+function saveSettingsPanel() {
+  const ak = document.getElementById('settings-anthropic').value.trim()
+  const sk = document.getElementById('settings-supabase').value.trim()
+  if (ak) { apiKey = ak; localStorage.setItem('levi_anthropic_key', ak) }
+  if (sk) { supabaseKey = sk; localStorage.setItem('levi_supabase_key', sk); initSupabase(); ensureSession() }
+  closeSettings(); showToast('â Keys actualizadas')
+}
+
+// âââââââââââââââââââââââââââââââ
+// HELPERS
+// âââââââââââââââââââââââââââââââ
+function setSyncStatus(online) { document.getElementById('sync-dot').classList.toggle('offline', !online) }
 function showToast(msg) {
   const t = document.getElementById('toast'); t.textContent = msg; t.className = 'show'
   setTimeout(() => t.className = '', 2500)
 }
-function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight,100)+'px' }
-function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }
-
-// ═══════════════════════════════════════
-// SYSTEM PROMPT
-// ═══════════════════════════════════════
-function getSystemPrompt(existingProducts) {
-  const prodContext = existingProducts?.length
-    ? '\n\n## PRODUCTOS YA REGISTRADOS:\n' + existingProducts.join('\n')
-    : ''
-
-  return `Eres LEVI, asistente de sourcing de Pentaliv. Evaluás productos con proveedores chinos en tiempo real.
-
-## DOCTRINA PENTALIV
-- B2B, hogar, marca privada, importa China → Israel, vende al por mayor
-- Categorías: cocina funcional, almacenamiento, limpieza, mantenimiento
-- Excluido: decoración, vajilla decorativa, textiles estéticos
-- Roles: CLASICO (ya se vende bien), STEPUP (valor agregado demostrable, no gadget), COMPLEMENTO (resuelve micro-problema adyacente)
-- Marca privada: impresión directa > in-mold > caja impresa > sticker
-- No el más barato — competir en calidad
-- Este viaje es solo scouting. Pedidos desde Israel.
-- Costos: broker 7% FOB + seguro 0.3%. Flete y arancel pendientes.
-
-## ESTILO
-- Preguntas directas, cortas, numeradas
-- Máximo 5 preguntas por mensaje
-- Sin preámbulos, sin halagos, sin "te soy sincero Moshe"
-- Español rioplatense
-
-## FLUJO
-1. IDENTIFICAR: describí lo que ves. Si hay ambigüedad, preguntá primero.
-2. RECOLECTAR en rondas lógicas:
-   - Ronda 1: precio FOB, MOQ, dimensiones, peso
-   - Ronda 2: opciones de packaging (cualquier tipo que ofrezcan, sin limitarte a formatos fijos), lead time
-   - Ronda 3: criterios de calidad para este material específico (buscá online, pedile a Moshe que verifique)
-   - Ronda 4: normativas Israel para este producto (buscá online, indicá qué certificados pedir)
-3. EVALUAR: rol, fit doctrina, calidad, viabilidad marca privada, nota 1-10
-4. Si Moshe expresa su opinión personal sobre el producto, registrala en el campo 'opinion_usuario'
-5. FICHA cuando Moshe diga "guardar", "listo" o "siguiente":
-
-<FICHA_JSON>
-{"nombre":"","descripcion":"","categoria":"","rol":"","fit_doctrina":"","proveedor_nombre":"","proveedor_stand":"","proveedor_contacto":"","precio_fob_usd":null,"moq_base":null,"packaging_opciones":[],"lead_time_dias":null,"largo_cm":null,"ancho_cm":null,"alto_cm":null,"peso_kg":null,"cbm_unidad":null,"cbm_caja_master":null,"unidades_por_caja":null,"material_principal":"","criterios_evaluados":[],"notas_calidad":"","muestra_disponible":null,"costo_muestra_usd":null,"normativa_israel":[],"certificados_requeridos":[],"certificados_disponibles":[],"certificados_faltantes":[],"notas_legales":"","arancel_tasa":null,"calificacion":null,"justificacion":"","fortalezas":[],"debilidades":[],"duplicados_vinculados":[],"notas_adicionales":"","comentarios":"","opinion_usuario":""}
-</FICHA_JSON>
-
-## REGLAS
-- Si faltan datos, completá con "" o null según el tipo — no bloquees el guardado
-- El rol puede ser cualquier categoría (clasico, stepup, complemento, decoracion, etc.) — siempre ponelo
-- Sé directo si el producto no encaja${prodContext}`
-}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') }
+function esc2(s) { return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 </script>
 </body>
 </html>
