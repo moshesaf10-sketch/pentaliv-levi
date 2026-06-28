@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="LEVI">
-<title>LEVI â Pentaliv</title>
+<title>LEVI — Pentaliv</title>
 <script>
 (async function() {
   try {
@@ -233,9 +233,9 @@ input[type=file] { display: none; }
     <small id="header-sub">Pentaliv Sourcing</small>
   </div>
   <div style="display:flex;gap:6px">
-    <button class="hbtn" onclick="showScreen('capture')">ð·</button>
-    <button class="hbtn" onclick="showScreen('dashboard');loadAndRenderDashboard()">ð</button>
-    <button class="hbtn" onclick="openSettings()">âï¸</button>
+    <button class="hbtn" onclick="showScreen('capture')">📷</button>
+    <button class="hbtn" onclick="showScreen('dashboard');loadAndRenderDashboard()">📋</button>
+    <button class="hbtn" onclick="openSettings()">⚙️</button>
   </div>
 </div>
 
@@ -245,11 +245,11 @@ input[type=file] { display: none; }
   <p>Solo la primera vez. Tus datos quedan guardados en este dispositivo.</p>
   <label class="setup-label">API Key de Anthropic</label>
   <input type="password" id="inp-anthropic" placeholder="sk-ant-api03-..." autocomplete="off">
-  <div class="setup-hint">â <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> â API Keys</div>
+  <div class="setup-hint">→ <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
   <label class="setup-label">Supabase Anon Key</label>
   <input type="password" id="inp-supabase-key" placeholder="eyJhbGci..." autocomplete="off">
-  <div class="setup-hint">â supabase.com â tu proyecto â Settings â API Keys â Publishable key</div>
-  <button class="btn-primary" onclick="saveSetup()">Guardar y empezar â</button>
+  <div class="setup-hint">→ supabase.com → tu proyecto → Settings → API Keys → Publishable key</div>
+  <button class="btn-primary" onclick="saveSetup()">Guardar y empezar →</button>
 </div>
 
 <!-- CAPTURE -->
@@ -257,20 +257,20 @@ input[type=file] { display: none; }
   <div id="supplier-bar">
     <div>
       <div id="supplier-bar-name">Sin proveedor</div>
-      <div id="supplier-bar-sub">SesiÃ³n China 2026</div>
+      <div id="supplier-bar-sub">Sesión China 2026</div>
     </div>
     <button id="btn-change-supplier" onclick="showSupplierModal()">Cambiar</button>
   </div>
 
   <!-- Empty state -->
   <div id="capture-empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px">
-    <button class="big-camera-btn" onclick="document.getElementById('file-main').click()">ð·</button>
-    <div class="big-camera-hint">FotografiÃ¡ el producto<br><span style="font-size:12px;color:#94a3b8">PodÃ©s seleccionar varias fotos</span></div>
+    <button class="big-camera-btn" onclick="document.getElementById('file-main').click()">📷</button>
+    <div class="big-camera-hint">Fotografiá el producto<br><span style="font-size:12px;color:#94a3b8">Podés seleccionar varias fotos</span></div>
   </div>
 
   <!-- Loading -->
   <div id="capture-loading" style="flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px">
-    <div style="font-size:36px">ð</div>
+    <div style="font-size:36px">🔍</div>
     <div class="analyzing-text">Analizando producto<span class="analyzing-dots"><span>.</span><span>.</span><span>.</span></span></div>
   </div>
 
@@ -280,13 +280,13 @@ input[type=file] { display: none; }
 
       <!-- Fotos -->
       <div class="form-section">
-        <div class="form-section-title">ð· Fotos</div>
+        <div class="form-section-title">📷 Fotos</div>
         <div id="form-photos"></div>
       </div>
 
-      <!-- IdentificaciÃ³n -->
+      <!-- Identificación -->
       <div class="form-section">
-        <div class="form-section-title">ð¦ Producto</div>
+        <div class="form-section-title">📦 Producto</div>
         <div class="frow">
           <div class="fcol" style="flex:2">
             <span class="flabel">Nombre</span>
@@ -296,26 +296,26 @@ input[type=file] { display: none; }
         <div class="frow">
           <div class="fcol">
             <span class="flabel">Material</span>
-            <input class="finput" id="f-material" placeholder="PlÃ¡stico, acero...">
+            <input class="finput" id="f-material" placeholder="Plástico, acero...">
           </div>
           <div class="fcol">
-            <span class="flabel">CategorÃ­a</span>
-            <input class="finput" id="f-categoria" placeholder="Cocina, baÃ±o...">
+            <span class="flabel">Categoría</span>
+            <input class="finput" id="f-categoria" placeholder="Cocina, baño...">
           </div>
         </div>
         <div class="frow">
           <div class="fcol">
-            <span class="flabel">DescripciÃ³n</span>
-            <textarea class="ftextarea" id="f-descripcion" rows="2" placeholder="QuÃ© es y para quÃ© sirve"></textarea>
+            <span class="flabel">Descripción</span>
+            <textarea class="ftextarea" id="f-descripcion" rows="2" placeholder="Qué es y para qué sirve"></textarea>
           </div>
         </div>
       </div>
 
       <!-- Precio -->
       <div class="form-section">
-        <div class="form-section-title">ð° Precio</div>
+        <div class="form-section-title">💰 Precio</div>
         <div class="currency-tabs">
-          <button class="currency-tab active" id="tab-yuan" onclick="setCurrency('yuan')">Â¥ Yuan</button>
+          <button class="currency-tab active" id="tab-yuan" onclick="setCurrency('yuan')">¥ Yuan</button>
           <button class="currency-tab" id="tab-usd" onclick="setCurrency('usd')">$ USD</button>
         </div>
         <table class="price-table">
@@ -324,34 +324,34 @@ input[type=file] { display: none; }
             <tr>
               <td><input type="number" inputmode="numeric" class="qty-input" placeholder="100"></td>
               <td><input type="number" inputmode="decimal" step="0.01" class="price-input" placeholder="0.00" oninput="updateNIS(this)"></td>
-              <td class="nis-cell">â</td>
-              <td><button class="btn-del-row" onclick="delPriceRow(this)">â</button></td>
+              <td class="nis-cell">—</td>
+              <td><button class="btn-del-row" onclick="delPriceRow(this)">✕</button></td>
             </tr>
             <tr>
               <td><input type="number" inputmode="numeric" class="qty-input" placeholder="500"></td>
               <td><input type="number" inputmode="decimal" step="0.01" class="price-input" placeholder="0.00" oninput="updateNIS(this)"></td>
-              <td class="nis-cell">â</td>
-              <td><button class="btn-del-row" onclick="delPriceRow(this)">â</button></td>
+              <td class="nis-cell">—</td>
+              <td><button class="btn-del-row" onclick="delPriceRow(this)">✕</button></td>
             </tr>
             <tr>
               <td><input type="number" inputmode="numeric" class="qty-input" placeholder="1000"></td>
               <td><input type="number" inputmode="decimal" step="0.01" class="price-input" placeholder="0.00" oninput="updateNIS(this)"></td>
-              <td class="nis-cell">â</td>
-              <td><button class="btn-del-row" onclick="delPriceRow(this)">â</button></td>
+              <td class="nis-cell">—</td>
+              <td><button class="btn-del-row" onclick="delPriceRow(this)">✕</button></td>
             </tr>
           </tbody>
         </table>
         <button class="btn-add-row" onclick="addPriceRow()">+ Agregar fila</button>
       </div>
 
-      <!-- LogÃ­stica -->
+      <!-- Logística -->
       <div class="form-section">
-        <div class="form-section-title">ð¦ Embalaje y logÃ­stica</div>
+        <div class="form-section-title">📦 Embalaje y logística</div>
         <div class="frow">
           <div class="fcol">
             <span class="flabel">Tipo embalaje</span>
             <select class="fselect" id="f-embalaje-tipo">
-              <option value="">â Seleccionar â</option>
+              <option value="">— Seleccionar —</option>
               <option value="individual">Caja individual</option>
               <option value="bulk">Bulk / granel</option>
               <option value="gift_box">Gift box</option>
@@ -396,9 +396,9 @@ input[type=file] { display: none; }
         </div>
       </div>
 
-      <!-- Producto fÃ­sico -->
+      <!-- Producto físico -->
       <div class="form-section">
-        <div class="form-section-title">ð Medidas del producto</div>
+        <div class="form-section-title">📐 Medidas del producto</div>
         <div class="frow">
           <div class="fcol">
             <span class="flabel">Largo (cm)</span>
@@ -427,33 +427,33 @@ input[type=file] { display: none; }
 
       <!-- Calidad -->
       <div class="form-section">
-        <div class="form-section-title">â­ Calidad percibida</div>
+        <div class="form-section-title">⭐ Calidad percibida</div>
         <div class="stars-wrap" id="stars-wrap">
-          <span class="star" onclick="setStar(1)">â</span>
-          <span class="star" onclick="setStar(2)">â</span>
-          <span class="star" onclick="setStar(3)">â</span>
-          <span class="star" onclick="setStar(4)">â</span>
-          <span class="star" onclick="setStar(5)">â</span>
+          <span class="star" onclick="setStar(1)">☆</span>
+          <span class="star" onclick="setStar(2)">☆</span>
+          <span class="star" onclick="setStar(3)">☆</span>
+          <span class="star" onclick="setStar(4)">☆</span>
+          <span class="star" onclick="setStar(5)">☆</span>
           <span id="star-label" style="font-size:13px;color:var(--gray);margin-left:4px"></span>
         </div>
-        <textarea class="ftextarea" id="f-calidad-notas" placeholder="Notas de calidad: acabado, materiales, construcciÃ³n..."></textarea>
+        <textarea class="ftextarea" id="f-calidad-notas" placeholder="Notas de calidad: acabado, materiales, construcción..."></textarea>
       </div>
 
       <!-- Documentos -->
       <div class="form-section">
-        <div class="form-section-title">ð Documentos internacionales disponibles</div>
-        <textarea class="ftextarea" id="f-documentos" placeholder="CE, FDA, LFGB, RoHS, etc. â lo que el proveedor muestra o tiene"></textarea>
+        <div class="form-section-title">📄 Documentos internacionales disponibles</div>
+        <textarea class="ftextarea" id="f-documentos" placeholder="CE, FDA, LFGB, RoHS, etc. — lo que el proveedor muestra o tiene"></textarea>
       </div>
 
       <!-- Notas -->
       <div class="form-section">
-        <div class="form-section-title">ð Notas</div>
+        <div class="form-section-title">📝 Notas</div>
         <textarea class="ftextarea" id="f-notas" placeholder="Cualquier info adicional relevante del momento..."></textarea>
       </div>
 
       <!-- Variantes -->
       <div class="form-section">
-        <div class="form-section-title">ð¨ Variantes (color / tamaÃ±o)</div>
+        <div class="form-section-title">🎨 Variantes (color / tamaño)</div>
         <div id="variants-list"></div>
         <button class="btn-add-variant" onclick="addVariant()">+ Agregar variante</button>
       </div>
@@ -467,13 +467,13 @@ input[type=file] { display: none; }
         <span class="chat-fill-label">Dictate info a LEVI</span>
         <input id="chat-fill-input" placeholder='ej: "10 yuan x100, 8 x500, caja de 12, 3kg, gift box"' onkeydown="if(event.key==='Enter')sendChatFill()">
       </div>
-      <button id="btn-chat-fill" onclick="sendChatFill()">â¤</button>
+      <button id="btn-chat-fill" onclick="sendChatFill()">➤</button>
     </div>
 
     <!-- Save bar -->
     <div id="form-save-bar">
-      <button id="btn-cancel-form" onclick="cancelCapture()">â</button>
-      <button id="btn-save-form" onclick="saveCaptureForm()">ð¾ Guardar producto</button>
+      <button id="btn-cancel-form" onclick="cancelCapture()">✕</button>
+      <button id="btn-save-form" onclick="saveCaptureForm()">💾 Guardar producto</button>
     </div>
   </div>
 </div>
@@ -483,7 +483,7 @@ input[type=file] { display: none; }
   <div id="dash-header">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div style="font-weight:700;font-size:17px">Productos <span id="dash-count" style="font-size:12px;font-weight:400;opacity:0.7"></span></div>
-      <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer">ð¥ Excel</button>
+      <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer">📥 Excel</button>
     </div>
     <div id="dash-stats">
       <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Evaluados</div></div>
@@ -497,13 +497,13 @@ input[type=file] { display: none; }
   </div>
   <div id="dash-filters">
     <button class="filter-btn active" onclick="setFilter('todos',this)">Todos</button>
-    <button class="filter-btn" onclick="setFilter('candidato',this)">â­ Candidatos</button>
+    <button class="filter-btn" onclick="setFilter('candidato',this)">⭐ Candidatos</button>
     <button class="filter-btn" onclick="setFilter('descartado',this)">Descartados</button>
   </div>
   <div id="products-list"></div>
 </div>
 
-<button id="btn-new" onclick="startNewCapture()">ï¼</button>
+<button id="btn-new" onclick="startNewCapture()">＋</button>
 
 <!-- MODAL -->
 <div id="modal">
@@ -515,8 +515,8 @@ input[type=file] { display: none; }
 <div id="supplier-modal">
   <div id="supplier-modal-bg" onclick="closeSupplierModal()"></div>
   <div id="supplier-modal-inner">
-    <h3>ðª Proveedor actual</h3>
-    <p>NÃºmero de stand / nombre del puesto en Yiwu</p>
+    <h3>🏪 Proveedor actual</h3>
+    <p>Número de stand / nombre del puesto en Yiwu</p>
     <input type="text" id="inp-stand" placeholder="Ej: A3-205, Hall 5 Stand 123..." autocomplete="off">
     <button class="btn-primary" onclick="saveSupplier()">Confirmar proveedor</button>
   </div>
@@ -525,10 +525,10 @@ input[type=file] { display: none; }
 <!-- SETTINGS -->
 <div id="settings-panel">
   <div id="settings-inner">
-    <h3>âï¸ ConfiguraciÃ³n</h3>
+    <h3>⚙️ Configuración</h3>
     <label class="settings-label">Anthropic API Key</label>
     <input type="password" id="settings-anthropic" placeholder="sk-ant-..." autocomplete="off">
-    <div class="settings-hint">platform.claude.com â API Keys</div>
+    <div class="settings-hint">platform.claude.com → API Keys</div>
     <label class="settings-label">Supabase Key</label>
     <input type="password" id="settings-supabase" placeholder="eyJ..." autocomplete="off">
     <button id="btn-settings-save" onclick="saveSettingsPanel()">Guardar</button>
@@ -544,17 +544,17 @@ input[type=file] { display: none; }
 <input type="file" id="file-variant" accept="image/*" onchange="handleVariantPhoto(event)">
 
 <script>
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // CONFIG
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 const SUPABASE_URL = 'https://vnxyxpbeinigxkueusfa.supabase.co'
 const CBM_CONTAINER = 67
 const YUAN_TO_NIS = 3
 const USD_TO_NIS = 20
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // STATE
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 let apiKey = localStorage.getItem('levi_anthropic_key') || ''
 let supabaseKey = localStorage.getItem('levi_supabase_key') || ''
 let sbClient = null
@@ -568,9 +568,9 @@ let currentCurrency = 'yuan'
 let currentStarRating = 0
 let pendingVariantIdx = null
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // INIT
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 window.onload = async () => {
   if (apiKey && supabaseKey) {
     initSupabase()
@@ -597,13 +597,13 @@ async function ensureSession() {
   } catch(e) {}
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // SETUP
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 async function saveSetup() {
   const ak = document.getElementById('inp-anthropic').value.trim()
   const sk = document.getElementById('inp-supabase-key').value.trim()
-  if (!ak || !sk) { alert('CompletÃ¡ los dos campos'); return }
+  if (!ak || !sk) { alert('Completá los dos campos'); return }
   apiKey = ak; supabaseKey = sk
   localStorage.setItem('levi_anthropic_key', ak)
   localStorage.setItem('levi_supabase_key', sk)
@@ -614,18 +614,18 @@ async function saveSetup() {
   showSupplierModal()
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // SCREENS
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
   document.getElementById(name + '-screen').classList.add('active')
   document.getElementById('btn-new').style.display = name === 'dashboard' ? 'flex' : 'none'
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // SUPPLIER
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function showSupplierModal() {
   document.getElementById('inp-stand').value = currentSupplier
   document.getElementById('supplier-modal').classList.add('show')
@@ -638,7 +638,7 @@ function closeSupplierModal() {
 
 function saveSupplier() {
   const val = document.getElementById('inp-stand').value.trim()
-  if (!val) { alert('IngresÃ¡ el nÃºmero de stand'); return }
+  if (!val) { alert('Ingresá el número de stand'); return }
   currentSupplier = val
   localStorage.setItem('levi_supplier', val)
   updateSupplierBar()
@@ -649,9 +649,9 @@ function updateSupplierBar() {
   document.getElementById('supplier-bar-name').textContent = currentSupplier ? `Stand: ${currentSupplier}` : 'Sin proveedor'
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // PHOTO CAPTURE
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 async function handleMainPhotos(e) {
   const files = Array.from(e.target.files)
   if (!files.length) return
@@ -696,9 +696,9 @@ function showCaptureState(state) {
   document.getElementById('capture-form').style.display = state === 'form' ? 'flex' : 'none'
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // AI CALLS
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 async function callHaiku(system, userContent) {
   const resp = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
     method: 'POST',
@@ -720,14 +720,14 @@ async function analyzePhotos(photos) {
   try {
     const content = [
       ...photos.slice(0,3).map(p => ({ type: 'image', source: { type: 'base64', media_type: p.type, data: p.base64 } })),
-      { type: 'text', text: 'AnalizÃ¡ este producto y devolvÃ© el JSON.' }
+      { type: 'text', text: 'Analizá este producto y devolvé el JSON.' }
     ]
     const text = await callHaiku(
       `Sos LEVI, asistente de captura de campo de Pentaliv en Yiwu China.
-Al recibir fotos de un producto, devolvÃ©s ÃNICAMENTE este JSON con los campos que podÃ©s inferir con certeza. No escribas nada mÃ¡s.
+Al recibir fotos de un producto, devolvés ÚNICAMENTE este JSON con los campos que podés inferir con certeza. No escribas nada más.
 
 <PREFILL_JSON>
-{"nombre":"nombre descriptivo en espaÃ±ol","material":"material principal","categoria":"categorÃ­a (cocina/organizaciÃ³n/baÃ±o/limpieza/otro)","descripcion":"quÃ© es y para quÃ© sirve en 1 frase"}
+{"nombre":"nombre descriptivo en español","material":"material principal","categoria":"categoría (cocina/organización/baño/limpieza/otro)","descripcion":"qué es y para qué sirve en 1 frase"}
 </PREFILL_JSON>`,
       content
     )
@@ -748,7 +748,7 @@ async function sendChatFill() {
     const currentState = getFormState()
     const response = await callHaiku(
       `Sos LEVI, asistente de captura de campo de Pentaliv.
-El usuario te dicta info del proveedor en lenguaje natural. ExtraÃ© los datos y devolvÃ© SOLO el JSON con los campos que mencionÃ³. Si no mencionÃ³ un campo, no lo incluyas.
+El usuario te dicta info del proveedor en lenguaje natural. Extraé los datos y devolvé SOLO el JSON con los campos que mencionó. Si no mencionó un campo, no lo incluyas.
 
 Campos posibles:
 - precio_moneda: "yuan" o "usd"
@@ -777,10 +777,10 @@ Campos posibles:
     const match = response.match(/<FILL_JSON>([\s\S]*?)<\/FILL_JSON>/)
     if (match) {
       applyFillJSON(JSON.parse(match[1].trim()))
-      showToast('â Campos actualizados')
+      showToast('✅ Campos actualizados')
     }
   } catch(e) {
-    showToast('â Error: ' + e.message)
+    showToast('❌ Error: ' + e.message)
   }
   btn.disabled = false
 }
@@ -829,9 +829,9 @@ function setVal(id, val) {
   if (el) el.value = val
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // FORM RENDERING
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function renderForm(prefill = {}) {
   // Reset
   resetFormFields()
@@ -872,7 +872,7 @@ function renderFormPhotos() {
   container.innerHTML = capturePhotos.map((p, i) =>
     `<div class="form-photo-wrap">
       <img src="${p.previewUrl}" alt="">
-      <button onclick="removeFormPhoto(${i})">â</button>
+      <button onclick="removeFormPhoto(${i})">✕</button>
     </div>`
   ).join('') +
   `<div class="add-photo-btn" onclick="document.getElementById('file-more').click()">+</div>`
@@ -883,9 +883,9 @@ function removeFormPhoto(i) {
   renderFormPhotos()
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // PRICE TABLE
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function setCurrency(cur) {
   currentCurrency = cur
   document.getElementById('tab-yuan').classList.toggle('active', cur === 'yuan')
@@ -898,19 +898,19 @@ function updateNIS(priceInput) {
   const row = priceInput.closest('tr')
   const nisCell = row.querySelector('.nis-cell')
   const price = parseFloat(priceInput.value)
-  if (!price || isNaN(price)) { nisCell.textContent = 'â'; return }
+  if (!price || isNaN(price)) { nisCell.textContent = '—'; return }
   const multiplier = currentCurrency === 'yuan' ? YUAN_TO_NIS : USD_TO_NIS
-  nisCell.textContent = 'âª' + (price * multiplier).toFixed(0)
+  nisCell.textContent = '₪' + (price * multiplier).toFixed(0)
 }
 
 function addPriceRow() {
   const tbody = document.getElementById('price-rows')
   const tr = document.createElement('tr')
   tr.innerHTML = `
-    <td><input type="number" inputmode="numeric" class="qty-input" placeholder="â"></td>
+    <td><input type="number" inputmode="numeric" class="qty-input" placeholder="—"></td>
     <td><input type="number" inputmode="decimal" step="0.01" class="price-input" placeholder="0.00" oninput="updateNIS(this)"></td>
-    <td class="nis-cell">â</td>
-    <td><button class="btn-del-row" onclick="delPriceRow(this)">â</button></td>`
+    <td class="nis-cell">—</td>
+    <td><button class="btn-del-row" onclick="delPriceRow(this)">✕</button></td>`
   tbody.appendChild(tr)
 }
 
@@ -920,9 +920,9 @@ function delPriceRow(btn) {
   btn.closest('tr').remove()
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // CBM AUTO-CALC
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function calcCBM() {
   const l = parseFloat(document.getElementById('f-largo-carton').value)
   const a = parseFloat(document.getElementById('f-ancho-carton').value)
@@ -932,9 +932,9 @@ function calcCBM() {
   }
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // STARS
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function setStar(n) {
   currentStarRating = n
   renderStars(n)
@@ -943,15 +943,15 @@ function setStar(n) {
 function renderStars(n) {
   const labels = ['', 'Malo', 'Regular', 'Bien', 'Muy bien', 'Excelente']
   document.querySelectorAll('#stars-wrap .star').forEach((s, i) => {
-    s.textContent = i < n ? 'â' : 'â'
+    s.textContent = i < n ? '★' : '☆'
     s.style.color = i < n ? '#f59e0b' : '#cbd5e1'
   })
   document.getElementById('star-label').textContent = n ? labels[n] : ''
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // VARIANTS
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function addVariant() {
   const id = Date.now()
   captureVariants.push({ id, name: '', photos: [], precios: [] })
@@ -964,16 +964,16 @@ function renderVariants() {
     <div class="variant-card">
       <div class="variant-header">
         <span class="variant-title">Variante ${idx + 1}</span>
-        <button class="btn-del-variant" onclick="deleteVariant(${idx})">ðï¸</button>
+        <button class="btn-del-variant" onclick="deleteVariant(${idx})">🗑️</button>
       </div>
       <div class="frow">
         <div class="fcol">
-          <span class="flabel">Nombre (color/tamaÃ±o)</span>
+          <span class="flabel">Nombre (color/tamaño)</span>
           <input class="finput" placeholder="Ej: Azul, Talle L..." value="${v.name}" oninput="captureVariants[${idx}].name=this.value">
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-        ${v.photos.map((p, pi) => `<div class="form-photo-wrap"><img src="${p.previewUrl}" style="width:56px;height:56px"><button onclick="removeVariantPhoto(${idx},${pi})">â</button></div>`).join('')}
+        ${v.photos.map((p, pi) => `<div class="form-photo-wrap"><img src="${p.previewUrl}" style="width:56px;height:56px"><button onclick="removeVariantPhoto(${idx},${pi})">✕</button></div>`).join('')}
         <div class="add-photo-btn" style="width:56px;height:56px;font-size:18px" onclick="triggerVariantPhoto(${idx})">+</div>
       </div>
     </div>`).join('')
@@ -1004,9 +1004,9 @@ function removeVariantPhoto(varIdx, photoIdx) {
   renderVariants()
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // GET FORM STATE
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function getFormState() {
   const precios = []
   document.querySelectorAll('#price-rows tr').forEach(row => {
@@ -1046,12 +1046,12 @@ function getFormState() {
   }
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // SAVE
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 async function saveCaptureForm() {
   const btn = document.getElementById('btn-save-form')
-  btn.textContent = 'â³ Guardando...'
+  btn.textContent = '⏳ Guardando...'
   btn.disabled = true
 
   try {
@@ -1117,11 +1117,11 @@ async function saveCaptureForm() {
     data._localPhotos = fotosUrls
     products.unshift(data)
 
-    showToast(`â "${state.nombre || 'Producto'}" guardado`)
+    showToast(`✅ "${state.nombre || 'Producto'}" guardado`)
     cancelCapture()
   } catch(e) {
-    alert('â Error guardando: ' + e.message)
-    btn.textContent = 'ð¾ Guardar producto'
+    alert('❌ Error guardando: ' + e.message)
+    btn.textContent = '💾 Guardar producto'
     btn.disabled = false
   }
 }
@@ -1131,7 +1131,7 @@ function cancelCapture() {
   captureVariants = []
   currentStarRating = 0
   showCaptureState('empty')
-  document.getElementById('btn-save-form').textContent = 'ð¾ Guardar producto'
+  document.getElementById('btn-save-form').textContent = '💾 Guardar producto'
   document.getElementById('btn-save-form').disabled = false
 }
 
@@ -1140,9 +1140,9 @@ function startNewCapture() {
   cancelCapture()
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // IMAGE COMPRESSION
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function compressImage(dataUrl, maxPx, quality) {
   return new Promise((resolve) => {
     const img = new Image()
@@ -1162,9 +1162,9 @@ function compressImage(dataUrl, maxPx, quality) {
   })
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // GET PHOTOS
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function getPhotos(p) {
   if (p._localPhotos?.length) return p._localPhotos
   try {
@@ -1177,9 +1177,9 @@ function getPhotos(p) {
   return []
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // DASHBOARD
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 async function loadAndRenderDashboard() {
   document.getElementById('products-list').innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8">Cargando...</div>'
   try {
@@ -1205,7 +1205,7 @@ function renderDashboard() {
   const fill = document.getElementById('cbm-bar-fill')
   fill.style.width = Math.min(pct, 100) + '%'
   fill.style.background = pct > 90 ? '#ef4444' : pct > 70 ? '#f59e0b' : '#22c55e'
-  document.getElementById('cbm-label').textContent = `${cbmTotal.toFixed(2)} / ${CBM_CONTAINER} CBM â ${(CBM_CONTAINER - cbmTotal).toFixed(2)} disponibles`
+  document.getElementById('cbm-label').textContent = `${cbmTotal.toFixed(2)} / ${CBM_CONTAINER} CBM — ${(CBM_CONTAINER - cbmTotal).toFixed(2)} disponibles`
 
   const filtered = products.filter(p => {
     if (currentFilter === 'todos') return true
@@ -1223,16 +1223,16 @@ function productCardHTML(p) {
   const photos = getPhotos(p)
   const thumb = photos[0]
     ? `<div class="product-thumb"><img src="${photos[0]}" alt=""></div>`
-    : `<div class="product-thumb">ð¦</div>`
+    : `<div class="product-thumb">📦</div>`
   const statusTag = `<span class="tag tag-${p.status}">${p.status}</span>`
-  const stars = p.calidad_estrellas ? 'â'.repeat(p.calidad_estrellas) + 'â'.repeat(5 - p.calidad_estrellas) : ''
+  const stars = p.calidad_estrellas ? '★'.repeat(p.calidad_estrellas) + '☆'.repeat(5 - p.calidad_estrellas) : ''
   const priceInfo = p.precios_por_cantidad?.length
-    ? p.precios_por_cantidad[0]?.precio + ' ' + (p.precio_moneda === 'yuan' ? 'Â¥' : '$')
-    : (p.precio_fob_usd ? '$' + p.precio_fob_usd : 'â')
+    ? p.precios_por_cantidad[0]?.precio + ' ' + (p.precio_moneda === 'yuan' ? '¥' : '$')
+    : (p.precio_fob_usd ? '$' + p.precio_fob_usd : '—')
   const nisInfo = p.precios_por_cantidad?.[0]?.precio
-    ? 'âª' + Math.round(p.precios_por_cantidad[0].precio * (p.precio_moneda === 'yuan' ? YUAN_TO_NIS : USD_TO_NIS))
-    : 'â'
-  const photoIndicator = photos.length > 0 ? `<span style="font-size:10px;color:#94a3b8;margin-left:4px">ð·${photos.length}</span>` : ''
+    ? '₪' + Math.round(p.precios_por_cantidad[0].precio * (p.precio_moneda === 'yuan' ? YUAN_TO_NIS : USD_TO_NIS))
+    : '—'
+  const photoIndicator = photos.length > 0 ? `<span style="font-size:10px;color:#94a3b8;margin-left:4px">📷${photos.length}</span>` : ''
   return `<div class="product-card">
     <div class="product-card-body">
       ${thumb}
@@ -1245,20 +1245,20 @@ function productCardHTML(p) {
         <div class="product-nums">
           <div class="num-cell"><strong>${priceInfo}</strong>Precio</div>
           <div class="num-cell"><strong>${nisInfo}</strong>Consumidor</div>
-          <div class="num-cell"><strong>${p.cbm_caja_master || 'â'}</strong>CBM</div>
+          <div class="num-cell"><strong>${p.cbm_caja_master || '—'}</strong>CBM</div>
         </div>
       </div>
     </div>
     <div class="product-actions">
       ${p.status === 'candidato'
-        ? `<button class="action-btn" style="color:#92400e" onclick="setStatus('${p.id}','completo');event.stopPropagation()">â© Quitar â­</button>`
-        : `<button class="action-btn green" onclick="setStatus('${p.id}','candidato');event.stopPropagation()">â­ Candidato</button>`}
-      <button class="action-btn" onclick="openModal('${p.id}');event.stopPropagation()">Ver mÃ¡s</button>
-      <button class="action-btn blue" onclick="editProduct('${p.id}');event.stopPropagation()">âï¸</button>
+        ? `<button class="action-btn" style="color:#92400e" onclick="setStatus('${p.id}','completo');event.stopPropagation()">↩ Quitar ⭐</button>`
+        : `<button class="action-btn green" onclick="setStatus('${p.id}','candidato');event.stopPropagation()">⭐ Candidato</button>`}
+      <button class="action-btn" onclick="openModal('${p.id}');event.stopPropagation()">Ver más</button>
+      <button class="action-btn blue" onclick="editProduct('${p.id}');event.stopPropagation()">✏️</button>
       ${p.status === 'descartado'
-        ? `<button class="action-btn" style="color:#16a34a" onclick="setStatus('${p.id}','completo');event.stopPropagation()">â© Recuperar</button>`
-        : `<button class="action-btn red" onclick="setStatus('${p.id}','descartado');event.stopPropagation()">â</button>`}
-      <button class="action-btn" style="color:#dc2626" onclick="deleteProduct('${p.id}');event.stopPropagation()">ðï¸</button>
+        ? `<button class="action-btn" style="color:#16a34a" onclick="setStatus('${p.id}','completo');event.stopPropagation()">↩ Recuperar</button>`
+        : `<button class="action-btn red" onclick="setStatus('${p.id}','descartado');event.stopPropagation()">✕</button>`}
+      <button class="action-btn" style="color:#dc2626" onclick="deleteProduct('${p.id}');event.stopPropagation()">🗑️</button>
     </div>
   </div>`
 }
@@ -1271,12 +1271,12 @@ async function setStatus(id, status) {
 
 async function deleteProduct(id) {
   const p = products.find(x => x.id === id)
-  if (!confirm(`Â¿Borrar "${p?.nombre || 'este producto'}"?`)) return
+  if (!confirm(`¿Borrar "${p?.nombre || 'este producto'}"?`)) return
   const { error } = await sbClient.from('productos').delete().eq('id', id)
-  if (error) { showToast('â Error al borrar'); return }
+  if (error) { showToast('❌ Error al borrar'); return }
   products = products.filter(x => x.id !== id)
   renderDashboard()
-  showToast('ðï¸ Borrado')
+  showToast('🗑️ Borrado')
 }
 
 function setFilter(f, btn) {
@@ -1286,30 +1286,30 @@ function setFilter(f, btn) {
   renderDashboard()
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // MODAL
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function openModal(id) {
   const p = products.find(x => x.id === id); if (!p) return
   const photos = getPhotos(p)
-  let html = `<button onclick="closeModal()" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;z-index:1">â</button>`
+  let html = `<button onclick="closeModal()" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;z-index:1">✕</button>`
   if (photos.length) html += `<div class="photo-gallery">${photos.map(u => `<img src="${u}">`).join('')}</div>`
   html += `<div style="font-size:18px;font-weight:700;color:var(--blue-dark);margin-bottom:4px">${p.nombre || 'Sin nombre'}</div>`
   if (p.descripcion) html += `<div style="font-size:13px;color:#64748b;margin-bottom:10px">${p.descripcion}</div>`
 
   if (p.proveedor_stand) html += `<div style="font-size:12px;color:#94a3b8;margin-bottom:8px">Stand: ${p.proveedor_stand}</div>`
-  if (p.calidad_estrellas) html += `<div style="color:#f59e0b;margin-bottom:8px">${'â'.repeat(p.calidad_estrellas)}${'â'.repeat(5-p.calidad_estrellas)}</div>`
+  if (p.calidad_estrellas) html += `<div style="color:#f59e0b;margin-bottom:8px">${'★'.repeat(p.calidad_estrellas)}${'☆'.repeat(5-p.calidad_estrellas)}</div>`
 
   if (p.precios_por_cantidad?.length) {
-    html += `<div class="section-title">ð° Precios (${p.precio_moneda || 'yuan'})</div>`
+    html += `<div class="section-title">💰 Precios (${p.precio_moneda || 'yuan'})</div>`
     p.precios_por_cantidad.forEach(pr => {
-      const nis = pr.precio ? Math.round(pr.precio * (p.precio_moneda === 'yuan' ? YUAN_TO_NIS : USD_TO_NIS)) : 'â'
-      html += `<div class="detail-row"><span>${pr.cantidad ? pr.cantidad + ' uds' : 'â'}</span><span>${pr.precio || 'â'} â âª${nis}</span></div>`
+      const nis = pr.precio ? Math.round(pr.precio * (p.precio_moneda === 'yuan' ? YUAN_TO_NIS : USD_TO_NIS)) : '—'
+      html += `<div class="detail-row"><span>${pr.cantidad ? pr.cantidad + ' uds' : '—'}</span><span>${pr.precio || '—'} → ₪${nis}</span></div>`
     })
   }
 
   if (p.embalaje_tipo || p.unidades_por_caja || p.cbm_caja_master) {
-    html += `<div class="section-title">ð¦ LogÃ­stica</div>`
+    html += `<div class="section-title">📦 Logística</div>`
     if (p.embalaje_tipo) html += row('Embalaje', p.embalaje_tipo)
     if (p.unidades_caja_interna) html += row('Uds/caja interna', p.unidades_caja_interna)
     if (p.unidades_por_caja) html += row('Uds/carton', p.unidades_por_caja)
@@ -1318,23 +1318,23 @@ function openModal(id) {
   }
 
   if (p.documentos_internacionales) {
-    html += `<div class="section-title">ð Documentos</div>`
+    html += `<div class="section-title">📄 Documentos</div>`
     html += `<div style="font-size:13px;color:#334155">${esc(p.documentos_internacionales)}</div>`
   }
 
   if (p.notas_calidad) {
-    html += `<div class="section-title">â­ Calidad</div>`
+    html += `<div class="section-title">⭐ Calidad</div>`
     html += `<div style="font-size:13px;color:#334155">${esc(p.notas_calidad)}</div>`
   }
 
   if (p.notas_adicionales) {
-    html += `<div class="section-title">ð Notas</div>`
+    html += `<div class="section-title">📝 Notas</div>`
     html += `<div style="font-size:13px;color:#334155">${esc(p.notas_adicionales)}</div>`
   }
 
   if (p.variantes?.length) {
-    html += `<div class="section-title">ð¨ Variantes</div>`
-    p.variantes.forEach(v => html += `<div style="font-size:13px;color:#334155;margin-bottom:2px">â¢ ${v.nombre || 'â'}</div>`)
+    html += `<div class="section-title">🎨 Variantes</div>`
+    p.variantes.forEach(v => html += `<div style="font-size:13px;color:#334155;margin-bottom:2px">• ${v.nombre || '—'}</div>`)
   }
 
   html += `<div style="height:20px"></div>`
@@ -1345,20 +1345,20 @@ function openModal(id) {
 function row(label, value) { return `<div class="detail-row"><span>${label}</span><span>${value}</span></div>` }
 function closeModal() { document.getElementById('modal').classList.remove('show') }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // EDIT
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function editProduct(id) {
   const p = products.find(x => x.id === id); if (!p) return
   const html = `
-    <button onclick="closeModal()" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer">â</button>
-    <div style="font-size:17px;font-weight:700;color:var(--blue-dark);margin-bottom:14px">âï¸ Editar</div>
+    <button onclick="closeModal()" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer">✕</button>
+    <div style="font-size:17px;font-weight:700;color:var(--blue-dark);margin-bottom:14px">✏️ Editar</div>
     <form onsubmit="saveEdit(event,'${id}')">
       <label class="edit-label">Nombre</label>
       <input class="edit-input" name="nombre" value="${esc2(p.nombre||'')}">
       <label class="edit-label">Material</label>
       <input class="edit-input" name="material_principal" value="${esc2(p.material_principal||'')}">
-      <label class="edit-label">CategorÃ­a</label>
+      <label class="edit-label">Categoría</label>
       <input class="edit-input" name="categoria" value="${esc2(p.categoria||'')}">
       <label class="edit-label">Stand proveedor</label>
       <input class="edit-input" name="proveedor_stand" value="${esc2(p.proveedor_stand||'')}">
@@ -1368,7 +1368,7 @@ function editProduct(id) {
       <textarea class="edit-textarea" name="documentos_internacionales">${p.documentos_internacionales||''}</textarea>
       <label class="edit-label">Notas adicionales</label>
       <textarea class="edit-textarea" name="notas_adicionales">${p.notas_adicionales||''}</textarea>
-      <button type="submit" class="btn-edit-save">ð¾ Guardar</button>
+      <button type="submit" class="btn-edit-save">💾 Guardar</button>
       <button type="button" class="btn-edit-cancel" onclick="closeModal()">Cancelar</button>
     </form>`
   document.getElementById('modal-content').innerHTML = html
@@ -1388,17 +1388,17 @@ async function saveEdit(e, id) {
     notas_adicionales: form.notas_adicionales.value || null
   }
   const btn = form.querySelector('button[type=submit]')
-  btn.textContent = 'â³...'; btn.disabled = true
+  btn.textContent = '⏳...'; btn.disabled = true
   const { error } = await sbClient.from('productos').update(updates).eq('id', id)
-  if (error) { alert('Error: ' + error.message); btn.textContent = 'ð¾ Guardar'; btn.disabled = false; return }
+  if (error) { alert('Error: ' + error.message); btn.textContent = '💾 Guardar'; btn.disabled = false; return }
   const idx = products.findIndex(x => x.id === id)
   if (idx >= 0) products[idx] = { ...products[idx], ...updates }
-  closeModal(); renderDashboard(); showToast('â Actualizado')
+  closeModal(); renderDashboard(); showToast('✅ Actualizado')
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // EXPORT
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function exportExcel() {
   if (!products.length) { alert('Sin productos'); return }
   const cols = ['nombre','categoria','material_principal','proveedor_stand','precio_moneda','precio_fob_usd','embalaje_tipo','unidades_por_caja','cbm_caja_master','peso_carton_kg','colores_variantes','calidad_estrellas','notas_calidad','documentos_internacionales','notas_adicionales','status','created_at']
@@ -1409,7 +1409,7 @@ function exportExcel() {
     if (typeof v === 'object') return `"${JSON.stringify(v).replace(/"/g,'""')}"`
     return `"${String(v).replace(/"/g,'""')}"`
   }).join(','))
-  const csv = 'ï»¿' + header + '\n' + rows.join('\n')
+  const csv = '﻿' + header + '\n' + rows.join('\n')
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a'); a.href = url
@@ -1417,9 +1417,9 @@ function exportExcel() {
   a.click()
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // SETTINGS
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function openSettings() {
   document.getElementById('settings-anthropic').value = ''
   document.getElementById('settings-supabase').value = ''
@@ -1431,12 +1431,12 @@ function saveSettingsPanel() {
   const sk = document.getElementById('settings-supabase').value.trim()
   if (ak) { apiKey = ak; localStorage.setItem('levi_anthropic_key', ak) }
   if (sk) { supabaseKey = sk; localStorage.setItem('levi_supabase_key', sk); initSupabase(); ensureSession() }
-  closeSettings(); showToast('â Keys actualizadas')
+  closeSettings(); showToast('✅ Keys actualizadas')
 }
 
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 // HELPERS
-// âââââââââââââââââââââââââââââââ
+// ═══════════════════════════════
 function setSyncStatus(online) { document.getElementById('sync-dot').classList.toggle('offline', !online) }
 function showToast(msg) {
   const t = document.getElementById('toast'); t.textContent = msg; t.className = 'show'
