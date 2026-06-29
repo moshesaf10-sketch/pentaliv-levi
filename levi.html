@@ -262,10 +262,28 @@ input[type=file] { display: none; }
     <button id="btn-change-supplier" onclick="showSupplierModal()">Cambiar</button>
   </div>
 
-  <!-- Empty state -->
-  <div id="capture-empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px">
-    <button class="big-camera-btn" onclick="document.getElementById('file-main').click()">📷</button>
-    <div class="big-camera-hint">Fotografiá el producto<br><span style="font-size:12px;color:#94a3b8">Podés seleccionar varias fotos</span></div>
+  <!-- Empty state — chat style entry -->
+  <div id="capture-empty" style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f8fafc">
+
+    <!-- Photos preview area -->
+    <div id="empty-photos-area" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column">
+      <div id="empty-photos-hint" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#94a3b8;min-height:100px">
+        <div style="font-size:52px">📷</div>
+        <div style="font-size:14px;font-weight:600;color:#64748b;text-align:center">Adjuntá fotos del producto</div>
+        <div style="font-size:12px;text-align:center;line-height:1.5">Podés subir varias fotos y/o escribir<br>datos — LEVI rellena la planilla</div>
+      </div>
+      <div id="empty-photos-grid" style="display:none;flex-wrap:wrap;gap:8px;align-content:flex-start"></div>
+    </div>
+
+    <!-- Chat-style input bar -->
+    <div style="background:white;border-top:1px solid #e2e8f0;padding:10px 12px;flex-shrink:0;padding-bottom:max(10px,env(safe-area-inset-bottom))">
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:6px">Dictale datos a LEVI (opcional)</div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <button onclick="document.getElementById('file-main').click()" style="width:40px;height:40px;border:1.5px solid #e2e8f0;border-radius:12px;background:white;font-size:22px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">📷</button>
+        <textarea id="empty-chat-input" placeholder='ej: "10 yuan x100, caja de 12, 3kg, polybag"' rows="1" style="flex:1;border:1.5px solid #e2e8f0;border-radius:16px;padding:9px 14px;font-size:14px;font-family:inherit;outline:none;resize:none;line-height:1.4;max-height:80px" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();analyzeAndFill()}"></textarea>
+        <button id="btn-analyze" onclick="analyzeAndFill()" style="width:40px;height:40px;background:var(--blue);color:white;border:none;border-radius:12px;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">➤</button>
+      </div>
+    </div>
   </div>
 
   <!-- Loading -->
@@ -350,14 +368,7 @@ input[type=file] { display: none; }
         <div class="frow">
           <div class="fcol">
             <span class="flabel">Tipo embalaje</span>
-            <select class="fselect" id="f-embalaje-tipo">
-              <option value="">— Seleccionar —</option>
-              <option value="individual">Caja individual</option>
-              <option value="bulk">Bulk / granel</option>
-              <option value="gift_box">Gift box</option>
-              <option value="polybag">Polybag</option>
-              <option value="otro">Otro</option>
-            </select>
+            <input class="finput" type="text" id="f-embalaje-tipo" placeholder="Caja individual, polybag, bulk...">
           </div>
         </div>
         <div class="frow">
@@ -564,6 +575,7 @@ let products = []
 let currentFilter = 'todos'
 let capturePhotos = []    // [{base64, type, previewUrl}]
 let captureVariants = []  // [{id, name, photos, precios}]
+let pendingFill = null    // data dictated before taking photos
 let currentCurrency = 'yuan'
 let currentStarRating = 0
 let pendingVariantIdx = null
@@ -656,19 +668,47 @@ async function handleMainPhotos(e) {
   const files = Array.from(e.target.files)
   if (!files.length) return
   e.target.value = ''
-  capturePhotos = []
-  captureVariants = []
-  currentStarRating = 0
-
   for (const file of files) {
     const dataUrl = await readFile(file)
     capturePhotos.push({ base64: dataUrl.split(',')[1], type: file.type, previewUrl: dataUrl })
   }
+  renderEmptyPhotos()
+}
 
+function renderEmptyPhotos() {
+  const hint = document.getElementById('empty-photos-hint')
+  const grid = document.getElementById('empty-photos-grid')
+  if (!hint || !grid) return
+  if (!capturePhotos.length) {
+    hint.style.display = 'flex'
+    grid.style.display = 'none'
+    return
+  }
+  hint.style.display = 'none'
+  grid.style.display = 'flex'
+  grid.innerHTML = capturePhotos.map((p, i) => `
+    <div style="position:relative">
+      <img src="${p.previewUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:1px solid #e2e8f0;display:block">
+      <button onclick="removeEmptyPhoto(${i})" style="position:absolute;top:-5px;right:-5px;width:20px;height:20px;background:#334155;color:white;border:none;border-radius:50%;font-size:11px;cursor:pointer;line-height:1">✕</button>
+    </div>
+  `).join('')
+}
+
+function removeEmptyPhoto(i) {
+  capturePhotos.splice(i, 1)
+  renderEmptyPhotos()
+}
+
+async function analyzeAndFill() {
+  const textHint = (document.getElementById('empty-chat-input')?.value || '').trim()
+  if (!capturePhotos.length && !textHint) { showToast('Agregá fotos o escribí algo primero'); return }
+  captureVariants = []
+  currentStarRating = 0
   showCaptureState('loading')
-  const prefill = await analyzePhotos(capturePhotos)
+  const prefill = await analyzePhotosWithHint(capturePhotos, textHint)
   showCaptureState('form')
   renderForm(prefill)
+  if (pendingFill) { applyFillJSON(pendingFill); pendingFill = null }
 }
 
 async function handleMorePhotos(e) {
@@ -716,23 +756,32 @@ async function callHaiku(system, userContent) {
   return data.content.find(b => b.type === 'text')?.text || ''
 }
 
-async function analyzePhotos(photos) {
+async function analyzePhotosWithHint(photos, textHint = '') {
   try {
+    const userMsg = textHint
+      ? `Analizá estas fotos del producto. El usuario también aportó: "${textHint}". Devolvé el JSON dentro de las etiquetas <PREFILL_JSON>.`
+      : 'Analizá este producto. Devolvé el JSON dentro de las etiquetas <PREFILL_JSON>.'
     const content = [
-      ...photos.slice(0,3).map(p => ({ type: 'image', source: { type: 'base64', media_type: p.type, data: p.base64 } })),
-      { type: 'text', text: 'Analizá este producto y devolvé el JSON.' }
+      ...photos.slice(0,4).map(p => ({ type: 'image', source: { type: 'base64', media_type: p.type, data: p.base64 } })),
+      { type: 'text', text: userMsg }
     ]
-    const text = await callHaiku(
-      `Sos LEVI, asistente de captura de campo de Pentaliv en Yiwu China.
-Al recibir fotos de un producto, devolvés ÚNICAMENTE este JSON con los campos que podés inferir con certeza. No escribas nada más.
+    const systemPrompt = `Sos LEVI, asistente de captura de campo de Pentaliv en Yiwu China.
+Analizás fotos de productos y devolvés ÚNICAMENTE el JSON envuelto en etiquetas <PREFILL_JSON></PREFILL_JSON>. Siempre incluí nombre y descripcion si podés verlos. No escribas nada fuera de las etiquetas.
 
+Ejemplo de respuesta EXACTA:
 <PREFILL_JSON>
-{"nombre":"nombre descriptivo en español","material":"material principal","categoria":"categoría (cocina/organización/baño/limpieza/otro)","descripcion":"qué es y para qué sirve en 1 frase"}
-</PREFILL_JSON>`,
-      content
-    )
+{"nombre":"nombre descriptivo en español","material":"material principal","categoria":"cocina|organización|baño|limpieza|hogar|otro","descripcion":"qué es y para qué sirve en 1 frase"}
+</PREFILL_JSON>`
+
+    const text = photos.length
+      ? await callHaiku(systemPrompt, content)
+      : await callHaiku(systemPrompt, textHint)
+
     const match = text.match(/<PREFILL_JSON>([\s\S]*?)<\/PREFILL_JSON>/)
     if (match) return JSON.parse(match[1].trim())
+    // Fallback: parsear JSON crudo si el modelo no puso etiquetas
+    const jsonMatch = text.match(/\{[\s\S]*?\}/)
+    if (jsonMatch) return JSON.parse(jsonMatch[0])
   } catch(e) { console.log('analyze error', e) }
   return {}
 }
@@ -784,6 +833,7 @@ Campos posibles:
   }
   btn.disabled = false
 }
+
 
 function applyFillJSON(data) {
   if (data.nombre) setVal('f-nombre', data.nombre)
@@ -1088,9 +1138,6 @@ async function saveCaptureForm() {
       embalaje_tipo: state.embalaje_tipo || null,
       unidades_caja_interna: state.uds_caja_interna,
       unidades_por_caja: state.uds_carton,
-      largo_carton_cm: state.largo_carton_cm,
-      ancho_carton_cm: state.ancho_carton_cm,
-      alto_carton_cm: state.alto_carton_cm,
       cbm_caja_master: state.cbm_carton,
       peso_carton_kg: state.peso_carton_kg,
       largo_cm: state.largo_prod_cm,
@@ -1130,6 +1177,10 @@ function cancelCapture() {
   capturePhotos = []
   captureVariants = []
   currentStarRating = 0
+  pendingFill = null
+  const inp = document.getElementById('empty-chat-input')
+  if (inp) inp.value = ''
+  renderEmptyPhotos()
   showCaptureState('empty')
   document.getElementById('btn-save-form').textContent = '💾 Guardar producto'
   document.getElementById('btn-save-form').disabled = false
