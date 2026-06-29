@@ -494,7 +494,7 @@ input[type=file] { display: none; }
   <div id="dash-header">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div style="font-weight:700;font-size:17px">Productos <span id="dash-count" style="font-size:12px;font-weight:400;opacity:0.7"></span></div>
-      <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer">📥 Excel</button>
+      <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer">📋 Catálogo</button>
     </div>
     <div id="dash-stats">
       <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Evaluados</div></div>
@@ -1139,6 +1139,7 @@ async function saveCaptureForm() {
       ancho_cm: state.ancho_prod_cm || null,
       alto_cm: state.alto_prod_cm || null,
       peso_kg: state.peso_unidad_kg || null,
+      calificacion: state.calidad_estrellas || null,
       notas_calidad: state.calidad_notas || null,
       notas_adicionales: state.notas || null,
       foto_url: fotosUrls[0] || null,
@@ -1443,20 +1444,112 @@ async function saveEdit(e, id) {
 // ═══════════════════════════════
 function exportExcel() {
   if (!products.length) { alert('Sin productos'); return }
-  const cols = ['nombre','categoria','material_principal','proveedor_stand','precio_moneda','precio_fob_usd','embalaje_tipo','unidades_por_caja','cbm_caja_master','peso_carton_kg','colores_variantes','calidad_estrellas','notas_calidad','documentos_internacionales','notas_adicionales','status','created_at']
-  const header = cols.join(',')
-  const rows = products.map(p => cols.map(c => {
-    const v = p[c]
-    if (v == null) return ''
-    if (typeof v === 'object') return `"${JSON.stringify(v).replace(/"/g,'""')}"`
-    return `"${String(v).replace(/"/g,'""')}"`
-  }).join(','))
-  const csv = '﻿' + header + '\n' + rows.join('\n')
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+
+  const date = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' })
+  const total = products.length
+  const candidatos = products.filter(p => p.status === 'candidato').length
+  const descartados = products.filter(p => p.status === 'descartado').length
+
+  const rows = products.map(p => {
+    const stars = p.calificacion
+      ? '★'.repeat(p.calificacion) + '☆'.repeat(5 - p.calificacion)
+      : ''
+    const bgColor = p.status === 'candidato' ? '#f0fdf4' : p.status === 'descartado' ? '#fef2f2' : '#ffffff'
+    const statusColor = p.status === 'candidato' ? '#16a34a' : p.status === 'descartado' ? '#dc2626' : '#64748b'
+    const statusBg = p.status === 'candidato' ? '#dcfce7' : p.status === 'descartado' ? '#fee2e2' : '#f1f5f9'
+    const foto = p.foto_url
+      ? `<img src="${p.foto_url}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;display:block;border:1px solid #e2e8f0">`
+      : `<div style="width:90px;height:90px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px">📦</div>`
+    const precio = p.precio_fob_usd ? `<span style="font-size:18px;font-weight:700;color:#0369a1">$${p.precio_fob_usd}</span><span style="font-size:11px;color:#94a3b8"> USD</span>` : '<span style="color:#94a3b8">—</span>'
+    const logistica = [
+      p.unidades_por_caja ? `Uds/caja: ${p.unidades_por_caja}` : '',
+      p.cbm_caja_master ? `CBM: ${p.cbm_caja_master} m³` : '',
+      p.largo_cm || p.ancho_cm || p.alto_cm ? `${p.largo_cm||'?'}×${p.ancho_cm||'?'}×${p.alto_cm||'?'} cm` : '',
+      p.peso_kg ? `${p.peso_kg} kg/ud` : ''
+    ].filter(Boolean).join(' · ')
+
+    return `<tr style="background:${bgColor}">
+      <td style="padding:10px;text-align:center;vertical-align:middle">${foto}</td>
+      <td style="padding:10px;vertical-align:top;min-width:180px">
+        <div style="font-weight:700;font-size:15px;color:#0c4a6e;margin-bottom:4px">${p.nombre || '—'}</div>
+        ${p.descripcion ? `<div style="font-size:12px;color:#6b7280;margin-bottom:6px;line-height:1.4">${p.descripcion}</div>` : ''}
+        ${p.categoria ? `<span style="font-size:10px;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:10px;margin-right:4px">${p.categoria}</span>` : ''}
+        ${p.material_principal ? `<span style="font-size:10px;background:#fce7f3;color:#9d174d;padding:2px 7px;border-radius:10px">${p.material_principal}</span>` : ''}
+      </td>
+      <td style="padding:10px;vertical-align:top;font-size:13px;color:#374151">
+        ${p.proveedor_stand ? `<div style="font-weight:600">🏪 ${p.proveedor_stand}</div>` : '<span style="color:#94a3b8">—</span>'}
+      </td>
+      <td style="padding:10px;vertical-align:top;text-align:center">
+        <div>${precio}</div>
+        ${logistica ? `<div style="font-size:11px;color:#94a3b8;margin-top:6px;line-height:1.6">${logistica}</div>` : ''}
+      </td>
+      <td style="padding:10px;vertical-align:top;text-align:center">
+        ${stars ? `<div style="color:#f59e0b;font-size:18px;letter-spacing:1px">${stars}</div>` : '<span style="color:#cbd5e1">sin calificar</span>'}
+        ${p.notas_calidad ? `<div style="font-size:11px;color:#6b7280;margin-top:6px;max-width:160px;text-align:left">${p.notas_calidad}</div>` : ''}
+      </td>
+      <td style="padding:10px;vertical-align:top;font-size:12px;color:#374151;max-width:200px">
+        ${p.notas_adicionales || '<span style="color:#94a3b8">—</span>'}
+      </td>
+      <td style="padding:10px;vertical-align:middle;text-align:center">
+        <span style="background:${statusBg};color:${statusColor};border:1px solid ${statusColor};padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap">${p.status || '—'}</span>
+      </td>
+    </tr>`
+  }).join('')
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pentaliv — Evaluación ${date}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, Arial, Helvetica, sans-serif; background: #f8fafc; padding: 24px; color: #1e293b; }
+  .header { background: linear-gradient(135deg, #0c4a6e, #0369a1); color: white; padding: 24px 28px; border-radius: 14px; margin-bottom: 24px; }
+  .header h1 { font-size: 24px; margin-bottom: 4px; }
+  .header p { font-size: 13px; opacity: 0.7; }
+  .stats { display: flex; gap: 12px; margin-top: 16px; }
+  .stat { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 18px; text-align: center; }
+  .stat-n { font-size: 26px; font-weight: 800; }
+  .stat-l { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #0c4a6e; color: white; padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; }
+  td { border-bottom: 1px solid #f1f5f9; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { filter: brightness(0.97); }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏭 Pentaliv — Evaluación de productos</h1>
+  <p>Exportado el ${date}</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">Evaluados</div></div>
+    <div class="stat"><div class="stat-n" style="color:#86efac">${candidatos}</div><div class="stat-l">Candidatos</div></div>
+    <div class="stat"><div class="stat-n" style="color:#fca5a5">${descartados}</div><div class="stat-l">Descartados</div></div>
+  </div>
+</div>
+<table>
+  <thead><tr>
+    <th>Foto</th>
+    <th>Producto</th>
+    <th>Stand</th>
+    <th>Precio / Logística</th>
+    <th>Calidad</th>
+    <th>Notas</th>
+    <th>Estado</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+</body>
+</html>`
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a'); a.href = url
-  a.download = 'pentaliv-' + new Date().toISOString().slice(0,10) + '.csv'
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'pentaliv-' + new Date().toISOString().slice(0,10) + '.html'
   a.click()
+  URL.revokeObjectURL(url)
 }
 
 // ═══════════════════════════════
