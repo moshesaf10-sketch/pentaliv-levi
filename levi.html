@@ -494,7 +494,10 @@ input[type=file] { display: none; }
   <div id="dash-header">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div style="font-weight:700;font-size:17px">Productos <span id="dash-count" style="font-size:12px;font-weight:400;opacity:0.7"></span></div>
-      <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer">📋 Catálogo</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="exportExcel()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer">📋 Catálogo</button>
+        <button onclick="exportXlsx()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer">📊 Excel</button>
+      </div>
     </div>
     <div id="dash-stats">
       <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Evaluados</div></div>
@@ -1550,6 +1553,74 @@ function exportExcel() {
   a.download = 'pentaliv-' + new Date().toISOString().slice(0,10) + '.html'
   a.click()
   URL.revokeObjectURL(url)
+}
+
+async function exportXlsx() {
+  if (!products.length) { alert('Sin productos'); return }
+  showToast('⏳ Generando Excel...')
+
+  // Cargar SheetJS si no está
+  if (!window.XLSX) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script')
+      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'
+      s.onload = resolve; s.onerror = reject
+      document.head.appendChild(s)
+    })
+  }
+
+  const rows = products.map(p => ({
+    'Estado': p.status || '',
+    'Nombre': p.nombre || '',
+    'Descripción': p.descripcion || '',
+    'Categoría': p.categoria || '',
+    'Material': p.material_principal || '',
+    'Stand / Proveedor': p.proveedor_stand || '',
+    'Precio USD': p.precio_fob_usd || '',
+    'Uds/caja': p.unidades_por_caja || '',
+    'CBM caja (m³)': p.cbm_caja_master || '',
+    'Largo cm': p.largo_cm || '',
+    'Ancho cm': p.ancho_cm || '',
+    'Alto cm': p.alto_cm || '',
+    'Peso kg': p.peso_kg || '',
+    'Calidad ★': p.calificacion ? '★'.repeat(p.calificacion) + '☆'.repeat(5 - p.calificacion) : '',
+    'Notas calidad': p.notas_calidad || '',
+    'Notas adicionales': p.notas_adicionales || '',
+    'Foto URL': p.foto_url || '',
+    'Fecha': p.created_at ? p.created_at.slice(0, 10) : ''
+  }))
+
+  const ws = XLSX.utils.json_to_sheet(rows)
+
+  // Anchos de columna
+  ws['!cols'] = [
+    { wch: 12 }, // Estado
+    { wch: 28 }, // Nombre
+    { wch: 35 }, // Descripción
+    { wch: 15 }, // Categoría
+    { wch: 15 }, // Material
+    { wch: 20 }, // Stand
+    { wch: 12 }, // Precio
+    { wch: 10 }, // Uds
+    { wch: 12 }, // CBM
+    { wch: 9  }, // Largo
+    { wch: 9  }, // Ancho
+    { wch: 9  }, // Alto
+    { wch: 9  }, // Peso
+    { wch: 14 }, // Calidad
+    { wch: 35 }, // Notas calidad
+    { wch: 35 }, // Notas adicionales
+    { wch: 60 }, // Foto URL
+    { wch: 12 }, // Fecha
+  ]
+
+  // Congelar primera fila
+  ws['!freeze'] = { xSplit: 0, ySplit: 1 }
+
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Productos')
+  XLSX.writeFile(wb, 'pentaliv-' + new Date().toISOString().slice(0, 10) + '.xlsx')
+  showToast('✅ Excel descargado')
 }
 
 // ═══════════════════════════════
